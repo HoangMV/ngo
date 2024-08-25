@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Thêm link Font Awesome vào phần <head> của trang -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <title>Shop Nhà Ngố - Báo Cáo Mua Hàng</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
@@ -61,6 +63,10 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-filter>* {
+            flex: 1 1 200px;
         }
 
         .search-filter input[type="text"],
@@ -195,6 +201,8 @@
             width: 39px;
             text-align: center;
             font-size: 14px;
+            color: #2ecc71;
+            font-weight: bold;
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 4px;
@@ -371,6 +379,160 @@
         .save-btn:hover {
             background-color: #45a049;
         }
+
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex: 1 1 100%;
+        }
+
+        .toggle-label {
+            margin-right: 10px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Điều chỉnh layout cho màn hình nhỏ */
+        @media (max-width: 768px) {
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .search-filter>* {
+                flex: 1 1 auto;
+            }
+
+            .toggle-container {
+                justify-content: space-between;
+            }
+
+            .slider.round {
+                width: 60px;
+            }
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex: 1 1 100%;
+        }
+
+        .toggle-label {
+            margin-right: 10px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 30px;
+            color: #4a90e2;
+            margin-left: 10px;
+            padding: 5px;
+        }
+
+        .refresh-btn:hover {
+            color: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .toggle-container {
+                justify-content: space-between;
+            }
+
+            .refresh-btn {
+                margin-left: 0;
+            }
+        }
+
+
+        .quantity-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quantity-group span {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .quantity-needed {
+            color: #e74c3c;
+            /* Màu đỏ */
+        }
+
+        .quantity-purchased {
+            color: #2ecc71;
+            /* Màu xanh lá */
+        }
+
+        .quantity-remaining {
+            color: #3498db;
+            /* Màu xanh dương cho số còn lại */
+        }
     </style>
 </head>
 
@@ -379,6 +541,7 @@
     <main>
         <h2>BÁO CÁO MUA HÀNG TỔNG HỢP</h2>
 
+        <!-- Cập nhật phần HTML trong .search-filter -->
         <div class="search-filter">
             <input type="text" id="searchInput" placeholder="Tìm kiếm...">
             <select id="groupFilter">
@@ -391,10 +554,14 @@
                 <option value="Đã mua">Đã mua</option>
                 <option value="Vượt số lượng">Vượt số lượng</option>
             </select>
-            <label>
-                <input type="checkbox" id="hidePurchasedItems" checked>
-                Ẩn sản phẩm đã mua
-            </label>
+            <div class="toggle-container">
+                <span class="toggle-label">Ẩn sản phẩm đã mua</span>
+                <label class="switch">
+                    <input type="checkbox" id="hidePurchasedItems" checked>
+                    <span class="slider round"></span>
+                </label>
+                <button id="refreshButton" class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
+            </div>
         </div>
 
         <div id="reportContent">
@@ -495,27 +662,27 @@
 
         function createTableHTML(data) {
             let tableHTML = `
-                <div style="overflow-x: auto;">
-                    <table id="purchaseTable">
-                        <thead>
-                            <tr>
-                                <th>Stt</th>
-                                <th>Hình Ảnh</th>
-                                <th>Tên Hàng Hóa</th>
-                                <th>
-                                    <div class="quantity-group">
-                                        <span>Cần Mua</span>
-                                        <span>Đã Mua</span>
-                                        <span>Còn Lại</span>
-                                    </div>
-                                </th>
-                                <th>Hành động</th>
-                                <th>Trạng thái</th>
-                                <th>Ghi Chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+        <div style="overflow-x: auto;">
+            <table id="purchaseTable">
+                <thead>
+                    <tr>
+                        <th>Stt</th>
+                        <th>Hình Ảnh</th>
+                        <th>Tên Hàng Hóa</th>
+                        <th>
+                            <div class="quantity-group">
+                                <span>Cần Mua</span>
+                                <span>Đã Mua</span>
+                                <span>Còn Lại</span>
+                            </div>
+                        </th>
+                        <th>Hành động</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi Chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
             data.forEach((item, index) => {
                 const conLai = item['Số lượng cần mua'] - item.daMua;
@@ -523,35 +690,35 @@
                 const hiddenClass = item.trangThai === 'Đã mua' && $('#hidePurchasedItems').is(':checked') ? 'hidden-row' : '';
 
                 tableHTML += `
-                    <tr class="${hiddenClass}">
-                        <td>${index + 1}</td>
-                        <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=QLBánhàng-2154080-24-08-14&tableName=${SHEET_NAME_2}&fileName=${item['Ảnh sản phẩm']}" alt="Ảnh" class="zoomable-image"></td>
-                        <td>${item['Tên sản phẩm'] || ''}</td>
-                        <td>
-                            <div class="quantity-group">
-                                <span>${item['Số lượng cần mua'] || 0}</span>
-                                <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
-                                    <input type="number" class="quantity-input" value="${item.daMua}" min="0" onchange="updateQuantity(this, ${index})">
-                                    <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
-                                </div>
-                                <span>${conLai}</span>
-                            </div>
-                        </td>
-                        <td><button class="buy-btn" onclick="buyItem(${index})">Mua</button></td>
-                        <td>
-                            <span class="status-label ${statusClass}">${item.trangThai}</span>
-                        </td>
-                        <td><input type="text" value="${item.ghiChu}" onchange="updateNote(this, ${index})"></td>
-                    </tr>
-                `;
+            <tr class="${hiddenClass}">
+                <td>${index + 1}</td>
+                <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=QLBánhàng-2154080-24-08-14&tableName=${SHEET_NAME_2}&fileName=${item['Ảnh sản phẩm']}" alt="Ảnh" class="zoomable-image"></td>
+                <td>${item['Tên sản phẩm'] || ''}</td>
+                <td>
+                    <div class="quantity-group">
+                        <span class="quantity-needed">${item['Số lượng cần mua'] || 0}</span>
+                        <div class="quantity-control">
+                            <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                            <input type="number" class="quantity-input" value="${item.daMua}" min="0" onchange="updateQuantity(this, ${index})">
+                            <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
+                        </div>
+                        <span class="quantity-remaining">${conLai}</span>
+                    </div>
+                </td>
+                <td><button class="buy-btn" onclick="buyItem(${index})">Mua</button></td>
+                <td>
+                    <span class="status-label ${statusClass}">${item.trangThai}</span>
+                </td>
+                <td><input type="text" value="${item.ghiChu}" onchange="updateNote(this, ${index})"></td>
+            </tr>
+        `;
             });
 
             tableHTML += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+                </tbody>
+            </table>
+        </div>
+    `;
 
             return tableHTML;
         }
@@ -657,26 +824,7 @@
             $('#nextPage').prop('disabled', currentPage === totalPages || totalItems === 0);
         }
 
-        function addClearDataButton() {
-            const button = $('<button>')
-                .text('Xóa dữ liệu đã lưu')
-                .css({
-                    marginTop: '20px',
-                    padding: '10px',
-                    backgroundColor: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                })
-                .click(function () {
-                    if (confirm('Bạn có chắc chắn muốn xóa tất cả dữ liệu đã lưu?')) {
-                        localStorage.removeItem('purchaseReportData');
-                        location.reload();
-                    }
-                });
-            $('main').append(button);
-        }
+        
 
         function setupImageZoom() {
             const modal = document.getElementById("imageModal");
@@ -710,9 +858,19 @@
         }
 
         function saveFilteredDataToSheet() {
-            const currentDate = new Date();
-            const formattedDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
-            const formattedTime = currentDate.toISOString().replace('T', ' ').split('.')[0]; // YYYY-MM-DD HH:MM:SS
+            // Tạo đối tượng Date với múi giờ Việt Nam
+            const vietnamTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+
+            // Định dạng ngày tháng
+            const formattedDate = vietnamTime.getFullYear() + '-' +
+                String(vietnamTime.getMonth() + 1).padStart(2, '0') + '-' +
+                String(vietnamTime.getDate()).padStart(2, '0');
+
+            // Định dạng thời gian
+            const formattedTime = formattedDate + ' ' +
+                String(vietnamTime.getHours()).padStart(2, '0') + ':' +
+                String(vietnamTime.getMinutes()).padStart(2, '0') + ':' +
+                String(vietnamTime.getSeconds()).padStart(2, '0');
 
             const dataToSave = allData.filter(item =>
                 ['Đã mua', 'Vượt số lượng', 'Đang mua'].includes(item.trangThai)
@@ -736,7 +894,7 @@
                 .then(response => {
                     console.log('Dữ liệu đã được lưu vào bảng "Mua hàng":', response);
                     alert(`${dataToSave.length} mục đã được lưu thành công!`);
-                    return reloadData(); // Tải lại dữ liệu sau khi lưu thành công
+                    return reloadData();
                 })
                 .catch(error => {
                     console.error('Lỗi khi lưu dữ liệu vào bảng "Mua hàng":', error);
@@ -759,7 +917,6 @@
                 await fetchCombinedData();
                 updateTable();
                 populateGroupFilter();
-                addClearDataButton();
                 setupImageZoom();
             } catch (error) {
                 $('#reportContent').html(`<p class="error">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>`);
@@ -811,6 +968,13 @@
                         .catch(error => {
                             console.error('Lỗi:', error);
                         });
+                }
+            });
+
+            $('#refreshButton').click(function () {
+                if (confirm('Bạn có chắc chắn muốn làm mới dữ liệu?')) {
+                    localStorage.removeItem('purchaseReportData');
+                    location.reload();
                 }
             });
         });
