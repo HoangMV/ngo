@@ -998,10 +998,12 @@
                     {
                         table: {
                             headerRows: 1,
-                            widths: [30, '*', 60, 50, 100],
+                            widths: [20, '*','*','*', 60, 50, 70],
                             body: [
                                 [
-                                    { text: 'STT', style: 'tableHeader' },
+                                    { text: '', style: 'tableHeader' },
+                                    { text: 'SKU', style: 'tableHeader' },
+                                    { text: 'Nhóm', style: 'tableHeader' },
                                     { text: 'Tên Sản Phẩm', style: 'tableHeader' },
                                     { text: 'Cần mua', style: 'tableHeader' },
                                     { text: 'Đã mua', style: 'tableHeader' },
@@ -1009,6 +1011,8 @@
                                 ],
                                 ...dataToExport.map((item, index) => [
                                     { text: index + 1, alignment: 'center' },
+                                    item['SKU'],
+                                    item['Nhóm Sản Phẩm'],
                                     item['Tên sản phẩm'],
                                     { text: item['Số lượng cần mua'], alignment: 'center' },
                                     { text: item.daMua, alignment: 'center' },
