@@ -52,6 +52,81 @@
             text-align: center;
         }
 
+        .search-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-filter input[type="text"],
+        .search-filter select {
+            flex: 1 1 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: white;
+        }
+
+        .search-filter select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z' fill='%23333'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 30px;
+        }
+
+        .search-filter label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            cursor: pointer;
+            flex: 1 1 100%;
+        }
+
+        .search-filter input[type="checkbox"] {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .search-filter {
+                flex-wrap: nowrap;
+                align-items: center;
+            }
+
+            .search-filter input[type="text"],
+            .search-filter select {
+                flex: 1 1 auto;
+            }
+
+            .search-filter label {
+                flex: 0 0 auto;
+                margin-left: 10px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .search-filter {
+                justify-content: space-between;
+            }
+
+            .search-filter input[type="text"] {
+                flex: 2 1 auto;
+            }
+
+            .search-filter select {
+                flex: 1 1 auto;
+            }
+        }
+
         table {
             width: 100%;
             border-collapse: separate;
@@ -188,16 +263,6 @@
             cursor: not-allowed;
         }
 
-        .search-filter {
-            margin-bottom: 20px;
-        }
-
-        .search-filter input,
-        .search-filter select {
-            padding: 5px;
-            margin-right: 10px;
-        }
-
         .status-label {
             padding: 5px 10px;
             border-radius: 15px;
@@ -231,84 +296,107 @@
         }
 
         .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: rgba(0,0,0,0.9);
-}
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
 
-.modal-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 95%;
-        max-height: 95%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-    }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95%;
+            max-height: 95%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
 
-    /* Thêm class mới cho hình nằm ngang */
-    .modal-content.landscape {
-        width: 95%;
-        height: auto;
-    }
+        .modal-content.landscape {
+            width: 95%;
+            height: auto;
+        }
 
-    /* Thêm class mới cho hình nằm dọc */
-    .modal-content.portrait {
-        height: 95%;
-        width: auto;
-    }
+        .modal-content.portrait {
+            height: 95%;
+            width: auto;
+        }
 
-.close {
-    position: absolute;
-    top: 15px;
-    right: 35px;
-    color: #f1f1f1;
-    font-size: 40px;
-    font-weight: bold;
-    transition: 0.3s;
-    z-index: 1001;
-}
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            z-index: 1001;
+        }
 
-.close:hover,
-.close:focus {
-    color: #bbb;
-    text-decoration: none;
-    cursor: pointer;
-}
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
 
-/* Đảm bảo modal hoạt động tốt trên các thiết bị di động */
-@media only screen and (max-width: 700px) {
-    .modal-content {
-        width: 100%;
-    }
-}
+        @media only screen and (max-width: 700px) {
+            .modal-content {
+                width: 100%;
+            }
+        }
+
+        .hidden-row {
+            display: none;
+        }
+
+        .save-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .save-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>Shop Nhà Ngố</h1>
-        <p>Địa Chỉ: 21 Linh Đường - Linh Đàm - Hà Nội</p>
-        <p>Điện Thoại: 0986 857 087</p>
-    </header>
 
     <main>
         <h2>BÁO CÁO MUA HÀNG TỔNG HỢP</h2>
+
         <div class="search-filter">
             <input type="text" id="searchInput" placeholder="Tìm kiếm...">
             <select id="groupFilter">
                 <option value="">Tất cả nhóm</option>
-                <!-- Các option sẽ được thêm động bằng JavaScript -->
             </select>
+            <select id="statusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Chưa mua">Chưa mua</option>
+                <option value="Đang mua">Đang mua</option>
+                <option value="Đã mua">Đã mua</option>
+                <option value="Vượt số lượng">Vượt số lượng</option>
+            </select>
+            <label>
+                <input type="checkbox" id="hidePurchasedItems" checked>
+                Ẩn sản phẩm đã mua
+            </label>
         </div>
+
         <div id="reportContent">
             <p class="loading">Đang tải dữ liệu...</p>
         </div>
@@ -317,6 +405,7 @@
             <span id="pageInfo"></span>
             <button id="nextPage">Sau</button>
         </div>
+        <button id="saveFilteredData" class="save-btn">Lưu dữ liệu vào bảng</button>
     </main>
 
     <div id="imageModal" class="modal">
@@ -377,7 +466,7 @@
                 ]);
 
                 allData = khoData.map(item => {
-                    const daMua = 0; // Hoặc lấy từ chiTietBanHangData nếu có
+                    const daMua = 0;
                     const canMua = parseInt(item['Số lượng cần mua']) || 0;
                     let trangThai = 'Chưa mua';
                     if (daMua > 0 && daMua < canMua) {
@@ -431,8 +520,10 @@
             data.forEach((item, index) => {
                 const conLai = item['Số lượng cần mua'] - item.daMua;
                 const statusClass = item.trangThai.toLowerCase().replace(' ', '-');
+                const hiddenClass = item.trangThai === 'Đã mua' && $('#hidePurchasedItems').is(':checked') ? 'hidden-row' : '';
+
                 tableHTML += `
-                    <tr>
+                    <tr class="${hiddenClass}">
                         <td>${index + 1}</td>
                         <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=QLBánhàng-2154080-24-08-14&tableName=${SHEET_NAME_2}&fileName=${item['Ảnh sản phẩm']}" alt="Ảnh" class="zoomable-image"></td>
                         <td>${item['Tên sản phẩm'] || ''}</td>
@@ -497,6 +588,7 @@
             statusLabel.addClass(newStatus.toLowerCase().replace(' ', '-'));
 
             saveDataToLocalStorage();
+
             console.log(`Cập nhật trạng thái: ${newStatus}, Class: ${newStatus.toLowerCase().replace(' ', '-')}`);
         }
 
@@ -521,12 +613,18 @@
         function updateTable() {
             const searchTerm = $('#searchInput').val().toLowerCase();
             const selectedGroup = $('#groupFilter').val();
+            const selectedStatus = $('#statusFilter').val();
+            const hidePurchased = $('#hidePurchasedItems').is(':checked');
 
-            filteredData = allData.filter(item =>
-                (item['Tên sản phẩm'].toLowerCase().includes(searchTerm) ||
-                    item['SKU'].toLowerCase().includes(searchTerm)) &&
-                (selectedGroup === '' || item['Nhóm Sản Phẩm'] === selectedGroup)
-            );
+            filteredData = allData.filter(item => {
+                const matchesSearch = item['Tên sản phẩm'].toLowerCase().includes(searchTerm) ||
+                    item['SKU'].toLowerCase().includes(searchTerm);
+                const matchesGroup = selectedGroup === '' || item['Nhóm Sản Phẩm'] === selectedGroup;
+                const matchesStatus = selectedStatus === '' || item.trangThai === selectedStatus;
+                const shouldShow = !hidePurchased || item.trangThai !== 'Đã mua';
+
+                return matchesSearch && matchesGroup && matchesStatus && shouldShow;
+            });
 
             const startIndex = (currentPage - 1) * itemsPerPage;
             const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
@@ -546,15 +644,9 @@
             item.trangThai = 'Đã mua';
             allData[originalIndex].trangThai = 'Đã mua';
 
-            const row = $(`#purchaseTable tr`).eq(index + 1);
-            row.find('.quantity-input').val(canMua);
-            row.find('.quantity-group span:last-child').text('0');
-            const statusLabel = row.find('.status-label');
-            statusLabel.text('Đã mua');
-            statusLabel.removeClass('chua-mua dang-mua da-mua vuot-so-luong');
-            statusLabel.addClass('da-mua');
-
             saveDataToLocalStorage();
+            updateTable();
+
             console.log(`Đã mua sản phẩm: ${item['Tên sản phẩm']}, Số lượng: ${canMua}`);
         }
 
@@ -562,7 +654,7 @@
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             $('#pageInfo').text(`Trang ${currentPage} / ${totalPages}`);
             $('#prevPage').prop('disabled', currentPage === 1);
-            $('#nextPage').prop('disabled', currentPage === totalPages);
+            $('#nextPage').prop('disabled', currentPage === totalPages || totalItems === 0);
         }
 
         function addClearDataButton() {
@@ -587,36 +679,80 @@
         }
 
         function setupImageZoom() {
-        const modal = document.getElementById("imageModal");
-        const modalImg = document.getElementById("modalImage");
-        const closeBtn = document.getElementsByClassName("close")[0];
+            const modal = document.getElementById("imageModal");
+            const modalImg = document.getElementById("modalImage");
+            const closeBtn = document.getElementsByClassName("close")[0];
 
-        $(document).on('click', '.zoomable-image', function() {
-            modal.style.display = "block";
-            modalImg.src = this.src.replace('thumbnail', 'fullsize'); // Thay 'thumbnail' và 'fullsize' bằng các phần phù hợp trong URL của bạn
-            
-            // Kiểm tra tỷ lệ khung hình và áp dụng class phù hợp
-            modalImg.onload = function() {
-                if (this.naturalWidth > this.naturalHeight) {
-                    modalImg.classList.add('landscape');
-                    modalImg.classList.remove('portrait');
-                } else {
-                    modalImg.classList.add('portrait');
-                    modalImg.classList.remove('landscape');
+            $(document).on('click', '.zoomable-image', function () {
+                modal.style.display = "block";
+                modalImg.src = this.src;
+
+                modalImg.onload = function () {
+                    if (this.naturalWidth > this.naturalHeight) {
+                        modalImg.classList.add('landscape');
+                        modalImg.classList.remove('portrait');
+                    } else {
+                        modalImg.classList.add('portrait');
+                        modalImg.classList.remove('landscape');
+                    }
                 }
-            }
-        });
+            });
 
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
+            closeBtn.onclick = function () {
                 modal.style.display = "none";
             }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
         }
-    }
+
+        function saveFilteredDataToSheet() {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+            const formattedTime = currentDate.toISOString().replace('T', ' ').split('.')[0]; // YYYY-MM-DD HH:MM:SS
+
+            const dataToSave = allData.filter(item =>
+                ['Đã mua', 'Vượt số lượng', 'Đang mua'].includes(item.trangThai)
+            ).map(item => ({
+                'Ngày mua': formattedDate,
+                'SKU(LÀ MÃ SẢN PHẨM)': item.SKU,
+                'Tên Sản Phẩm': item['Tên sản phẩm'],
+                'Số lượng mua': item.daMua,
+                'Số tiền mua': item['Giá bán'] ? item['Giá bán'] * item.daMua : 0,
+                'Người mua': 'Admin',
+                'Thời gian': formattedTime,
+                'Ghi chú': item.ghiChu || ''
+            }));
+
+            if (dataToSave.length === 0) {
+                alert('Không có dữ liệu nào để lưu.');
+                return Promise.resolve();
+            }
+
+            return apiRequest('Mua hàng', 'Add', { Rows: dataToSave })
+                .then(response => {
+                    console.log('Dữ liệu đã được lưu vào bảng "Mua hàng":', response);
+                    alert(`${dataToSave.length} mục đã được lưu thành công!`);
+                    return reloadData(); // Tải lại dữ liệu sau khi lưu thành công
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lưu dữ liệu vào bảng "Mua hàng":', error);
+                    alert('Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.');
+                });
+        }
+        async function reloadData() {
+            try {
+                localStorage.removeItem('purchaseReportData'); // Xóa dữ liệu cũ trong localStorage
+                allData = await fetchCombinedData(); // Tải lại dữ liệu mới
+                updateTable(); // Cập nhật bảng với dữ liệu mới
+            } catch (error) {
+                console.error('Lỗi khi tải lại dữ liệu:', error);
+                alert('Có lỗi xảy ra khi tải lại dữ liệu. Vui lòng thử lại sau.');
+            }
+        }
 
         async function initializeReport() {
             try {
@@ -646,7 +782,7 @@
         $(document).ready(function () {
             initializeReport();
 
-            $('#searchInput, #groupFilter').on('input change', function () {
+            $('#searchInput, #groupFilter, #statusFilter, #hidePurchasedItems').on('input change', function () {
                 currentPage = 1;
                 updateTable();
             });
@@ -659,10 +795,22 @@
             });
 
             $('#nextPage').click(function () {
-                const totalPages = Math.ceil(allData.length / itemsPerPage);
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
                 if (currentPage < totalPages) {
                     currentPage++;
                     updateTable();
+                }
+            });
+
+            $('#saveFilteredData').click(function () {
+                if (confirm('Bạn có chắc chắn muốn lưu dữ liệu đã mua vào bảng "Mua hàng"?')) {
+                    saveFilteredDataToSheet()
+                        .then(() => {
+                            // Không cần làm gì thêm ở đây vì reloadData đã được gọi trong saveFilteredDataToSheet
+                        })
+                        .catch(error => {
+                            console.error('Lỗi:', error);
+                        });
                 }
             });
         });
