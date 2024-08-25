@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shop Nhà Ngố - Báo Cáo Mua Hàng</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 16px;
+            color: #333;
+            touch-action: manipulation;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4a90e2, #5651e5);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        header p {
+            margin: 5px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        main {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #4a90e2;
+            font-size: 19px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        thead {
+            background-color: #f6f8fa;
+        }
+
+        th {
+            font-weight: 600;
+            color: #4a4a4a;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f8ff;
+        }
+
+        .quantity-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quantity-group span {
+            flex: 1;
+            text-align: center;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 4px;
+        }
+
+        .quantity-btn:hover {
+            background-color: #357abd;
+        }
+
+        .quantity-input {
+            width: 39px;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .over-purchased {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        img {
+            border-radius: 4px;
+            object-fit: cover;
+            width: 50px;
+            height: 50px;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+
+            th,
+            td {
+                padding: 8px;
+            }
+
+            .quantity-group {
+                flex-direction: column;
+            }
+
+            .quantity-group span {
+                margin: 2px 0;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .search-filter {
+            margin-bottom: 20px;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        .status-label {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .chua-mua {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .buy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .buy-btn:hover {
+            background-color: #45a049;
+        }
+
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 95%;
+        max-height: 95%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    /* Thêm class mới cho hình nằm ngang */
+    .modal-content.landscape {
+        width: 95%;
+        height: auto;
+    }
+
+    /* Thêm class mới cho hình nằm dọc */
+    .modal-content.portrait {
+        height: 95%;
+        width: auto;
+    }
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    z-index: 1001;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Đảm bảo modal hoạt động tốt trên các thiết bị di động */
+@media only screen and (max-width: 700px) {
+    .modal-content {
+        width: 100%;
+    }
+}
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Shop Nhà Ngố</h1>
+        <p>Địa Chỉ: 21 Linh Đường - Linh Đàm - Hà Nội</p>
+        <p>Điện Thoại: 0986 857 087</p>
+    </header>
+
+    <main>
+        <h2>BÁO CÁO MUA HÀNG TỔNG HỢP</h2>
+        <div class="search-filter">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm...">
+            <select id="groupFilter">
+                <option value="">Tất cả nhóm</option>
+                <!-- Các option sẽ được thêm động bằng JavaScript -->
+            </select>
+        </div>
+        <div id="reportContent">
+            <p class="loading">Đang tải dữ liệu...</p>
+        </div>
+        <div class="pagination">
+            <button id="prevPage">Trước</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage">Sau</button>
+        </div>
+    </main>
+
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        const APP_ID = '90034787-3238-4f94-b368-59d264db6cb9';
+        const API_KEY = 'V2-wdLR9-jwplY-BZu1d-nsReC-xzo1F-ISECp-yEKYv-CLdhq';
+        const SHEET_NAME_2 = 'Kho';
+        let allData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function apiRequest(tableName, action, data) {
+            const apiUrl = `https://www.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
+            return $.ajax({
+                url: apiUrl,
+                method: 'POST',
+                headers: {
+                    'ApplicationAccessKey': API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    Action: action,
+                    Properties: {
+                        Locale: 'vi-VN',
+                        Timezone: 'Asia/Ho_Chi_Minh'
+                    },
+                    ...data
+                })
+            });
+        }
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem('purchaseReportData', JSON.stringify(allData));
+        }
+
+        function loadDataFromLocalStorage() {
+            const savedData = localStorage.getItem('purchaseReportData');
+            return savedData ? JSON.parse(savedData) : null;
+        }
+
+        async function fetchCombinedData() {
+            try {
+                const savedData = loadDataFromLocalStorage();
+                if (savedData) {
+                    console.log('Đang sử dụng dữ liệu đã lưu');
+                    allData = savedData;
+                    return allData;
+                }
+
+                const [khoData, chiTietBanHangData] = await Promise.all([
+                    apiRequest('Kho', 'Find', { Rows: [], Properties: { Selector: 'Filter(Kho, [Số lượng cần mua]>0)' } }),
+                    apiRequest('Chi tiết bán hàng', 'Find', { Rows: [], Properties: { Selector: 'Filter(Chi tiết bán hàng, true)' } })
+                ]);
+
+                allData = khoData.map(item => {
+                    const daMua = 0; // Hoặc lấy từ chiTietBanHangData nếu có
+                    const canMua = parseInt(item['Số lượng cần mua']) || 0;
+                    let trangThai = 'Chưa mua';
+                    if (daMua > 0 && daMua < canMua) {
+                        trangThai = 'Đang mua';
+                    } else if (daMua === canMua) {
+                        trangThai = 'Đã mua';
+                    } else if (daMua > canMua) {
+                        trangThai = 'Vượt số lượng';
+                    }
+                    return {
+                        ...item,
+                        ...chiTietBanHangData.find(detail => detail['SKU'] === item['SKU']) || {},
+                        daMua,
+                        trangThai,
+                        ghiChu: ''
+                    };
+                });
+
+                saveDataToLocalStorage();
+                return allData;
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                throw error;
+            }
+        }
+
+        function createTableHTML(data) {
+            let tableHTML = `
+                <div style="overflow-x: auto;">
+                    <table id="purchaseTable">
+                        <thead>
+                            <tr>
+                                <th>Stt</th>
+                                <th>Hình Ảnh</th>
+                                <th>Tên Hàng Hóa</th>
+                                <th>
+                                    <div class="quantity-group">
+                                        <span>Cần Mua</span>
+                                        <span>Đã Mua</span>
+                                        <span>Còn Lại</span>
+                                    </div>
+                                </th>
+                                <th>Hành động</th>
+                                <th>Trạng thái</th>
+                                <th>Ghi Chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach((item, index) => {
+                const conLai = item['Số lượng cần mua'] - item.daMua;
+                const statusClass = item.trangThai.toLowerCase().replace(' ', '-');
+                tableHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=QLBánhàng-2154080-24-08-14&tableName=${SHEET_NAME_2}&fileName=${item['Ảnh sản phẩm']}" alt="Ảnh" class="zoomable-image"></td>
+                        <td>${item['Tên sản phẩm'] || ''}</td>
+                        <td>
+                            <div class="quantity-group">
+                                <span>${item['Số lượng cần mua'] || 0}</span>
+                                <div class="quantity-control">
+                                    <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                                    <input type="number" class="quantity-input" value="${item.daMua}" min="0" onchange="updateQuantity(this, ${index})">
+                                    <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
+                                </div>
+                                <span>${conLai}</span>
+                            </div>
+                        </td>
+                        <td><button class="buy-btn" onclick="buyItem(${index})">Mua</button></td>
+                        <td>
+                            <span class="status-label ${statusClass}">${item.trangThai}</span>
+                        </td>
+                        <td><input type="text" value="${item.ghiChu}" onchange="updateNote(this, ${index})"></td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            return tableHTML;
+        }
+
+        function updateQuantity(input, index) {
+            const value = parseInt($(input).val()) || 0;
+            const item = filteredData[index];
+            const originalIndex = allData.findIndex(d => d.SKU === item.SKU);
+            const canMua = parseInt(item['Số lượng cần mua']) || 0;
+
+            item.daMua = value;
+            allData[originalIndex].daMua = value;
+
+            const remaining = canMua - value;
+            $(input).closest('tr').find('.quantity-group span:last-child').text(remaining);
+
+            let newStatus;
+            if (value === 0) {
+                newStatus = 'Chưa mua';
+            } else if (value < canMua) {
+                newStatus = 'Đang mua';
+            } else if (value === canMua) {
+                newStatus = 'Đã mua';
+            } else {
+                newStatus = 'Vượt số lượng';
+            }
+
+            item.trangThai = newStatus;
+            allData[originalIndex].trangThai = newStatus;
+
+            const statusLabel = $(input).closest('tr').find('.status-label');
+            statusLabel.text(newStatus);
+            statusLabel.removeClass('chua-mua dang-mua da-mua vuot-so-luong');
+            statusLabel.addClass(newStatus.toLowerCase().replace(' ', '-'));
+
+            saveDataToLocalStorage();
+            console.log(`Cập nhật trạng thái: ${newStatus}, Class: ${newStatus.toLowerCase().replace(' ', '-')}`);
+        }
+
+        function updateNote(input, index) {
+            const value = $(input).val();
+            const item = filteredData[index];
+            const originalIndex = allData.findIndex(d => d.SKU === item.SKU);
+            item.ghiChu = value;
+            allData[originalIndex].ghiChu = value;
+            saveDataToLocalStorage();
+        }
+
+        function changeQuantity(index, change) {
+            const input = $(`#purchaseTable .quantity-input`).eq(index);
+            let value = parseInt(input.val()) || 0;
+            value += change;
+            if (value < 0) value = 0;
+            input.val(value);
+            updateQuantity(input[0], index);
+        }
+
+        function updateTable() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const selectedGroup = $('#groupFilter').val();
+
+            filteredData = allData.filter(item =>
+                (item['Tên sản phẩm'].toLowerCase().includes(searchTerm) ||
+                    item['SKU'].toLowerCase().includes(searchTerm)) &&
+                (selectedGroup === '' || item['Nhóm Sản Phẩm'] === selectedGroup)
+            );
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+            $('#reportContent').html(createTableHTML(paginatedData));
+            updatePagination(filteredData.length);
+        }
+
+        function buyItem(index) {
+            const item = filteredData[index];
+            const originalIndex = allData.findIndex(d => d.SKU === item.SKU);
+            const canMua = parseInt(item['Số lượng cần mua']) || 0;
+
+            item.daMua = canMua;
+            allData[originalIndex].daMua = canMua;
+
+            item.trangThai = 'Đã mua';
+            allData[originalIndex].trangThai = 'Đã mua';
+
+            const row = $(`#purchaseTable tr`).eq(index + 1);
+            row.find('.quantity-input').val(canMua);
+            row.find('.quantity-group span:last-child').text('0');
+            const statusLabel = row.find('.status-label');
+            statusLabel.text('Đã mua');
+            statusLabel.removeClass('chua-mua dang-mua da-mua vuot-so-luong');
+            statusLabel.addClass('da-mua');
+
+            saveDataToLocalStorage();
+            console.log(`Đã mua sản phẩm: ${item['Tên sản phẩm']}, Số lượng: ${canMua}`);
+        }
+
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            $('#pageInfo').text(`Trang ${currentPage} / ${totalPages}`);
+            $('#prevPage').prop('disabled', currentPage === 1);
+            $('#nextPage').prop('disabled', currentPage === totalPages);
+        }
+
+        function addClearDataButton() {
+            const button = $('<button>')
+                .text('Xóa dữ liệu đã lưu')
+                .css({
+                    marginTop: '20px',
+                    padding: '10px',
+                    backgroundColor: '#f44336',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                })
+                .click(function () {
+                    if (confirm('Bạn có chắc chắn muốn xóa tất cả dữ liệu đã lưu?')) {
+                        localStorage.removeItem('purchaseReportData');
+                        location.reload();
+                    }
+                });
+            $('main').append(button);
+        }
+
+        function setupImageZoom() {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+        const closeBtn = document.getElementsByClassName("close")[0];
+
+        $(document).on('click', '.zoomable-image', function() {
+            modal.style.display = "block";
+            modalImg.src = this.src.replace('thumbnail', 'fullsize'); // Thay 'thumbnail' và 'fullsize' bằng các phần phù hợp trong URL của bạn
+            
+            // Kiểm tra tỷ lệ khung hình và áp dụng class phù hợp
+            modalImg.onload = function() {
+                if (this.naturalWidth > this.naturalHeight) {
+                    modalImg.classList.add('landscape');
+                    modalImg.classList.remove('portrait');
+                } else {
+                    modalImg.classList.add('portrait');
+                    modalImg.classList.remove('landscape');
+                }
+            }
+        });
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+
+        async function initializeReport() {
+            try {
+                await fetchCombinedData();
+                updateTable();
+                populateGroupFilter();
+                addClearDataButton();
+                setupImageZoom();
+            } catch (error) {
+                $('#reportContent').html(`<p class="error">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>`);
+            }
+        }
+
+        function populateGroupFilter() {
+            const groups = [...new Set(allData.map(item => item['Nhóm Sản Phẩm']))];
+            const select = $('#groupFilter');
+            groups.forEach(group => {
+                if (group) {
+                    select.append($('<option>', {
+                        value: group,
+                        text: group
+                    }));
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            initializeReport();
+
+            $('#searchInput, #groupFilter').on('input change', function () {
+                currentPage = 1;
+                updateTable();
+            });
+
+            $('#prevPage').click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTable();
+                }
+            });
+
+            $('#nextPage').click(function () {
+                const totalPages = Math.ceil(allData.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTable();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
