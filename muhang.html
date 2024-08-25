@@ -13,7 +13,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f4f8;
             margin: 0;
-            padding: 16px;
+            padding: 0;
             color: #333;
             touch-action: manipulation;
         }
@@ -142,9 +142,13 @@
             overflow: hidden;
         }
 
-        th,
+        th {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
         td {
-            padding: 12px;
+            padding-left: 4px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -223,10 +227,6 @@
 
         @media (max-width: 600px) {
 
-            th,
-            td {
-                padding: 8px;
-            }
 
             .quantity-group {
                 flex-direction: column;
@@ -539,7 +539,6 @@
 <body>
 
     <main>
-        <h2>BÁO CÁO MUA HÀNG TỔNG HỢP</h2>
 
         <!-- Cập nhật phần HTML trong .search-filter -->
         <div class="search-filter">
@@ -666,7 +665,7 @@
             <table id="purchaseTable">
                 <thead>
                     <tr>
-                        <th>Stt</th>
+                        <th></th>
                         <th>Hình Ảnh</th>
                         <th>Tên Hàng Hóa</th>
                         <th>
@@ -858,49 +857,58 @@
         }
 
         function saveFilteredDataToSheet() {
-            // Tạo đối tượng Date với múi giờ Việt Nam
-            const vietnamTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    // Tạo đối tượng Date với múi giờ Việt Nam
+    const vietnamTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
 
-            // Định dạng ngày tháng
-            const formattedDate = vietnamTime.getFullYear() + '-' +
-                String(vietnamTime.getMonth() + 1).padStart(2, '0') + '-' +
-                String(vietnamTime.getDate()).padStart(2, '0');
+    // Định dạng ngày tháng
+    const formattedDate = vietnamTime.getFullYear() + '-' +
+        String(vietnamTime.getMonth() + 1).padStart(2, '0') + '-' +
+        String(vietnamTime.getDate()).padStart(2, '0');
 
-            // Định dạng thời gian
-            const formattedTime = formattedDate + ' ' +
-                String(vietnamTime.getHours()).padStart(2, '0') + ':' +
-                String(vietnamTime.getMinutes()).padStart(2, '0') + ':' +
-                String(vietnamTime.getSeconds()).padStart(2, '0');
+    // Định dạng thời gian
+    const formattedTime = formattedDate + ' ' +
+        String(vietnamTime.getHours()).padStart(2, '0') + ':' +
+        String(vietnamTime.getMinutes()).padStart(2, '0') + ':' +
+        String(vietnamTime.getSeconds()).padStart(2, '0');
 
-            const dataToSave = allData.filter(item =>
-                ['Đã mua', 'Vượt số lượng', 'Đang mua'].includes(item.trangThai)
-            ).map(item => ({
-                'Ngày mua': formattedDate,
-                'SKU(LÀ MÃ SẢN PHẨM)': item.SKU,
-                'Tên Sản Phẩm': item['Tên sản phẩm'],
-                'Số lượng mua': item.daMua,
-                'Số tiền mua': item['Giá bán'] ? item['Giá bán'] * item.daMua : 0,
-                'Người mua': 'Admin',
-                'Thời gian': formattedTime,
-                'Ghi chú': item.ghiChu || ''
-            }));
+    const dataToSave = allData.filter(item =>
+        ['Đã mua', 'Vượt số lượng', 'Đang mua'].includes(item.trangThai)
+    ).map(item => {
+        const canMua = parseInt(item['Số lượng cần mua']) || 0;
+        const daMua = item.daMua;
+        const chenhLech = canMua - daMua;
 
-            if (dataToSave.length === 0) {
-                alert('Không có dữ liệu nào để lưu.');
-                return Promise.resolve();
-            }
+        return {
+            'idmua': `${item.SKU}_${formattedDate.replace(/-/g, '')}`, // Tạo ID duy nhất
+            'Ngày mua': formattedDate,
+            'SKU(LÀ MÃ SẢN PHẨM)': item.SKU,
+            'Tên Sản Phẩm': item['Tên sản phẩm'],
+            'Cần mua': canMua,
+            'Số lượng mua': daMua,
+            'Chênh lệch': chenhLech,
+            'Số tiền mua': item['Giá bán'] ? item['Giá bán'] * daMua : 0,
+            'Người mua': 'Admin',
+            'Thời gian': formattedTime,
+            'Ghi chú': item.ghiChu || ''
+        };
+    });
 
-            return apiRequest('Mua hàng', 'Add', { Rows: dataToSave })
-                .then(response => {
-                    console.log('Dữ liệu đã được lưu vào bảng "Mua hàng":', response);
-                    alert(`${dataToSave.length} mục đã được lưu thành công!`);
-                    return reloadData();
-                })
-                .catch(error => {
-                    console.error('Lỗi khi lưu dữ liệu vào bảng "Mua hàng":', error);
-                    alert('Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.');
-                });
-        }
+    if (dataToSave.length === 0) {
+        alert('Không có dữ liệu nào để lưu.');
+        return Promise.resolve();
+    }
+
+    return apiRequest('Mua hàng', 'Add', { Rows: dataToSave })
+        .then(response => {
+            console.log('Dữ liệu đã được lưu vào bảng "Mua hàng":', response);
+            alert(`${dataToSave.length} mục đã được lưu thành công!`);
+            return reloadData();
+        })
+        .catch(error => {
+            console.error('Lỗi khi lưu dữ liệu vào bảng "Mua hàng":', error);
+            alert('Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.');
+        });
+}
         async function reloadData() {
             try {
                 localStorage.removeItem('purchaseReportData'); // Xóa dữ liệu cũ trong localStorage
