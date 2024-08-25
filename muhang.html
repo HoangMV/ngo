@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <title>Shop Nhà Ngố - Báo Cáo Mua Hàng</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -367,7 +371,6 @@
         }
 
         .save-btn {
-            margin-top: 20px;
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
@@ -534,6 +537,39 @@
             color: #3498db;
             /* Màu xanh dương cho số còn lại */
         }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .save-btn,
+        .export-btn {
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .save-btn {
+            background-color: #4CAF50;
+        }
+
+        .export-btn {
+            background-color: #3498db;
+        }
+
+        .save-btn:hover {
+            background-color: #45a049;
+        }
+
+        .export-btn:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 
@@ -572,7 +608,11 @@
             <span id="pageInfo"></span>
             <button id="nextPage">Sau</button>
         </div>
-        <button id="saveFilteredData" class="save-btn">Lưu dữ liệu vào bảng</button>
+        <!-- Cập nhật HTML để thêm nút xuất PDF -->
+        <div class="button-container">
+            <button id="saveFilteredData" class="save-btn">Lưu dữ liệu vào bảng</button>
+            <button id="exportPDF" class="export-btn">Xuất PDF</button>
+        </div>
     </main>
 
     <div id="imageModal" class="modal">
@@ -944,6 +984,53 @@
             });
         }
 
+        function generatePDF() {
+            const vietnamTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+            const formattedDate = vietnamTime.toLocaleDateString('vi-VN');
+
+            // Sử dụng toàn bộ dữ liệu thay vì chỉ lọc các sản phẩm đã mua
+            const dataToExport = filteredData;
+
+            const docDefinition = {
+                content: [
+                    { text: 'Thông tin mua hàng', style: 'header' },
+                    { text: `Ngày: ${formattedDate}`, style: 'subheader' },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: [30, '*', 60, 50, 100],
+                            body: [
+                                [
+                                    { text: 'STT', style: 'tableHeader' },
+                                    { text: 'Tên Sản Phẩm', style: 'tableHeader' },
+                                    { text: 'Cần mua', style: 'tableHeader' },
+                                    { text: 'Đã mua', style: 'tableHeader' },
+                                    { text: 'Ghi chú', style: 'tableHeader' }
+                                ],
+                                ...dataToExport.map((item, index) => [
+                                    { text: index + 1, alignment: 'center' },
+                                    item['Tên sản phẩm'],
+                                    { text: item['Số lượng cần mua'], alignment: 'center' },
+                                    { text: item.daMua, alignment: 'center' },
+                                    item.ghiChu || ''
+                                ])
+                            ]
+                        }
+                    }
+                ],
+                styles: {
+                    header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 10] },
+                    subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] },
+                    tableHeader: { bold: true, fontSize: 13, color: 'black', fillColor: '#f2f2f2' }
+                },
+                defaultStyle: {
+                    font: 'Roboto'
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download('bao-cao-mua-hang.pdf');
+        }
+
         $(document).ready(function () {
             initializeReport();
 
@@ -984,6 +1071,10 @@
                     localStorage.removeItem('purchaseReportData');
                     location.reload();
                 }
+            });
+
+            $('#exportPDF').click(function () {
+                generatePDF();
             });
         });
     </script>
