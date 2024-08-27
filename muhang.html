@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -732,7 +733,7 @@
                 tableHTML += `
             <tr class="${hiddenClass}">
                 <td>${index + 1}</td>
-                <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=QLBánhàng-2154080-24-08-14&tableName=${SHEET_NAME_2}&fileName=${item['Ảnh sản phẩm']}" alt="Ảnh" class="zoomable-image"></td>
+                <td><img src="https://www.appsheet.com/template/gettablefileurl?appName=App_QuanLyBanHangV2120824-2154080&tableName=${SHEET_NAME_2}&fileName=${encodeURIComponent( item['Ảnh sản phẩm'])}" alt="Ảnh" class="zoomable-image"></td>
                 <td>${item['Tên sản phẩm'] || ''}</td>
                 <td>
                     <div class="quantity-group">
