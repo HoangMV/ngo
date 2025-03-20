@@ -2049,16 +2049,6 @@
                 updateProgressSteps(2);
             }
         });
-        document.getElementById('khaiBaoForm').querySelector('.flex.justify-end').innerHTML += `
-    <button type="button" id="saveDraftBtn" 
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2 transition duration-200 flex items-center">
-        <i class="fas fa-save mr-2"></i> Lưu nháp
-    </button>
-    <button type="button" id="loadDraftBtn" 
-        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-200 flex items-center">
-        <i class="fas fa-folder-open mr-2"></i> Tải nháp
-    </button>
-`;
 
         // Add event listeners for the new buttons
         document.getElementById('saveDraftBtn').addEventListener('click', saveAsDraft);
