@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống khai báo lương</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Choices.js Customization */
+        .choices__list--multiple .choices__item {
+            background-color: #0ea5e9;
+            border: 1px solid #0ea5e9;
+        }
+
+        .choices__list--multiple .choices__item.is-highlighted {
+            background-color: #0284c7;
+            border: 1px solid #0284c7;
+        }
+
+        .choices__inner {
+            min-height: 44px;
+            background-color: #fff;
+            border-radius: 0.375rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .is-focused .choices__inner,
+        .is-open .choices__inner {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        .choices__input {
+            background-color: transparent;
+        }
+
+        /* Card hover effect */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .data-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        .data-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+        }
+
+        .data-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8fafc;
+            z-index: 5;
+        }
+
+        /* Input focus */
+        .custom-input:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-gray-800/70 backdrop-blur-sm z-50 flex justify-center items-center hidden transition-opacity duration-300">
+        <div class="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center animate-slide-up">
+            <div class="animate-spin text-primary-600 mb-4">
+                <i class="fas fa-circle-notch text-5xl"></i>
+            </div>
+            <p class="text-gray-700 font-medium text-lg" id="loadingText">Đang xử lý...</p>
+        </div>
+    </div>
+
+    <!-- Page Container -->
+    <div class=" mx-auto px-4 py-8 ">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-primary-600 text-white p-3 rounded-lg shadow-lg">
+                        <i class="fas fa-money-bill-wave text-xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800">Hệ thống khai báo lương</h1>
+                </div>
+
+                <div class="mt-4 md:mt-0 flex space-x-3">
+                    <button id="importBtn"
+                        class="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                        <i class="fas fa-file-import"></i>
+                        <span>Nhập dữ liệu</span>
+                    </button>
+                    <button id="exportBtn"
+                        class="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition">
+                        <i class="fas fa-file-export"></i>
+                        <span>Xuất báo cáo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Steps -->
+            <div class="mt-8 mb-4">
+                <div class="flex items-center justify-between w-full max-w-4xl mx-auto">
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-primary-600 text-white flex items-center justify-center rounded-full">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <span class="mt-2 text-sm font-medium text-gray-700">Khai báo</span>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2">
+                        <div class="h-1 bg-primary-500" style="width: 0%;" id="progress1"></div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-gray-300 text-gray-600 flex items-center justify-center rounded-full"
+                            id="step2">
+                            <i class="fas fa-table"></i>
+                        </div>
+                        <span class="mt-2 text-sm font-medium text-gray-500">Chi tiết</span>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2">
+                        <div class="h-1 bg-primary-500" style="width: 0%;" id="progress2"></div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-gray-300 text-gray-600 flex items-center justify-center rounded-full"
+                            id="step3">
+                            <i class="fas fa-save"></i>
+                        </div>
+                        <span class="mt-2 text-sm font-medium text-gray-500">Lưu trữ</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Form nhập liệu KhaibaoTBL -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8 hover-card animate-fade-in">
+                <div class="flex items-center border-b border-gray-200 pb-4 mb-5">
+                    <div class="bg-primary-100 text-primary-700 p-2 rounded-lg mr-3">
+                        <i class="fas fa-file-invoice text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Thông tin khai báo lương</h2>
+                </div>
+
+                <form id="khaiBaoForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">ID Khai báo</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-fingerprint text-gray-400"></i>
+                            </div>
+                            <input type="text" id="idkb"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-gray-50 text-gray-800"
+                                readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Ngày khai báo</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-calendar-alt text-gray-400"></i>
+                            </div>
+                            <input type="date" id="ngayKhaiBao"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Hiệu lực từ <span
+                                class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-calendar-check text-gray-400"></i>
+                            </div>
+                            <input type="date" id="hieuLucTu"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Lương tối thiểu <span
+                                class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-money-bill-wave text-gray-400"></i>
+                            </div>
+                            <input type="number" id="luongToiThieu"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white"
+                                required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span class="text-gray-500 text-sm">VNĐ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Nhóm ngạch <span
+                                class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-layer-group text-gray-400"></i>
+                            </div>
+                            <select id="nhomNgach"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white appearance-none"
+                                required>
+                                <option value="">-- Chọn nhóm ngạch --</option>
+                                <!-- Các option sẽ được thêm bằng JavaScript -->
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Số bậc (1-10) <span
+                                class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-stairs text-gray-400"></i>
+                            </div>
+                            <input type="number" id="soBac" min="1" max="10"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white"
+                                required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-10">
+                                <button type="button" class="text-gray-500 hover:text-gray-700 px-1.5"
+                                    onclick="decrementValue('soBac')">
+                                    <i class="fas fa-minus-circle"></i>
+                                </button>
+                                <button type="button" class="text-gray-500 hover:text-gray-700 px-1.5"
+                                    onclick="incrementValue('soBac', 10)">
+                                    <i class="fas fa-plus-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Chênh lệch các bậc (%) <span
+                                class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-percentage text-gray-400"></i>
+                            </div>
+                            <input type="number" id="chenhLechBac"
+                                class="custom-input w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white"
+                                required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span class="text-gray-500 text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end mt-4 space-x-3">
+                        <button type="button" id="resetFormBtn"
+                            class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 flex items-center">
+                            <i class="fas fa-redo-alt mr-2"></i> Làm mới
+                        </button>
+                        <button type="button" id="btnTaoChiTiet"
+                            class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-lg hover:from-amber-600 hover:to-yellow-700 shadow-md hover:shadow-lg transition duration-200 flex items-center">
+                            <i class="fas fa-table mr-2"></i> Tạo chi tiết
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng chi tiết KhaibaoTBLDE -->
+            <div id="chiTietSection" class="bg-white p-6 rounded-xl shadow-md mb-8 hidden animate-fade-in">
+                <div class="flex items-center border-b border-gray-200 pb-4 mb-5">
+                    <div class="bg-primary-100 text-primary-700 p-2 rounded-lg mr-3">
+                        <i class="fas fa-table-list text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Chi tiết ngạch lương</h2>
+                </div>
+
+                <div class="table-container rounded-lg border border-gray-200 mb-5">
+                    <table id="chiTietTable" class="data-table min-w-full bg-white">
+                        <thead id="chiTietTableHead">
+                            <!-- Header sẽ được tạo động bằng JavaScript -->
+                        </thead>
+                        <tbody id="chiTietTableBody">
+                            <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <span id="dataStatusText" class="text-sm text-gray-500 self-center mr-auto"></span>
+                    <button type="button" id="cancelBtn"
+                        class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 flex items-center">
+                        <i class="fas fa-times mr-2"></i> Hủy
+                    </button>
+                    <button type="button" id="saveAll"
+                        class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:from-blue-600 hover:to-blue-800 shadow-md hover:shadow-lg transition duration-200 flex items-center">
+                        <i class="fas fa-save mr-2"></i> Lưu tất cả
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thẻ trợ giúp -->
+            <div class="bg-white p-6 rounded-xl shadow-md hover-card animate-fade-in">
+                <div class="flex items-center border-b border-gray-200 pb-4 mb-5">
+                    <div class="bg-primary-100 text-primary-700 p-2 rounded-lg mr-3">
+                        <i class="fas fa-circle-info text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Trợ giúp & Hướng dẫn</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-file-invoice text-primary-600 mr-2"></i>
+                            <h3 class="font-medium text-gray-800">Khai báo lương</h3>
+                        </div>
+                        <p class="text-sm text-gray-600">Nhập đầy đủ thông tin về lương tối thiểu, nhóm ngạch, số bậc và
+                            chênh lệch các bậc để tạo bảng khai báo lương.</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-calculator text-primary-600 mr-2"></i>
+                            <h3 class="font-medium text-gray-800">Tính toán lương</h3>
+                        </div>
+                        <p class="text-sm text-gray-600">Hệ thống tự động tính toán lương các bậc dựa trên lương tối
+                            thiểu và tỷ lệ phần trăm chênh lệch giữa các bậc.</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-cloud-upload-alt text-primary-600 mr-2"></i>
+                            <h3 class="font-medium text-gray-800">Lưu trữ dữ liệu</h3>
+                        </div>
+                        <p class="text-sm text-gray-600">Sau khi hoàn tất nhập liệu và tạo chi tiết, nhấn "Lưu tất cả"
+                            để lưu thông tin vào hệ thống.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-10 border-t border-gray-200 pt-5">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm text-gray-600">© 2025 Hệ thống khai báo lương. All rights reserved.</p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-500 hover:text-primary-600 transition">
+                        <i class="fas fa-question-circle"></i> Hỗ trợ
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary-600 transition">
+                        <i class="fas fa-book"></i> Hướng dẫn
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary-600 transition">
+                        <i class="fas fa-shield-alt"></i> Điều khoản
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Thêm thư viện SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        let drafts = [];
+        const MAX_DRAFTS = 10;
+        const DRAFTS_STORAGE_KEY = 'khaiBaoLuongDrafts';
+        // Biến lưu trữ dữ liệu
+        let khaiBaoData = null;
+        let chiTietList = [];
+        let selectedPositions = {};
+        let allPositions = [];  // Tất cả các vị trí có sẵn
+        let assignedPositions = new Set();  // Các vị trí đã được gán
+        let CaiDatNL = [];
+        let CaiDatChucDanh = [];
+        let choicesInstances = {};
+        const appId = 'e6017786-8311-4f98-9160-0ffa00686169';
+        const ACCESS_KEY = 'V2-XsBEC-P7YR6-LBK2m-dYhVj-9SVNm-FUoLC-6HLgb-RP2Za';
+        let viTriOptions = [];
+        // Lấy các phần tử DOM
+        const saveAllBtn = document.getElementById('saveAll');
+        const btnTaoChiTiet = document.getElementById('btnTaoChiTiet');
+        const nhomNgachSelect = document.getElementById('nhomNgach');
+        const chiTietSection = document.getElementById('chiTietSection');
+        const chiTietTableHead = document.getElementById('chiTietTableHead');
+        const chiTietTableBody = document.getElementById('chiTietTableBody');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const importBtn = document.getElementById('importBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const dataStatusText = document.getElementById('dataStatusText');
+        const progress1 = document.getElementById('progress1');
+        const progress2 = document.getElementById('progress2');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+
+        // Hàm hiển thị và ẩn loading
+        function showLoading(message = 'Đang xử lý...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Hàm tăng/giảm giá trị input number
+        function incrementValue(id, max = null) {
+            const input = document.getElementById(id);
+            let value = parseInt(input.value) || 0;
+            if (max === null || value < max) {
+                input.value = value + 1;
+                input.dispatchEvent(new Event('change'));
+            }
+        }
+        // Function to save current form data as draft
+        function saveAsDraft() {
+            // Lấy ID khai báo hiện tại
+            const currentIdkb = document.getElementById('idkb').value;
+
+            // Tạo dữ liệu bản nháp
+            const draftData = {
+                id: Date.now(), // ID duy nhất dựa trên timestamp
+                timestamp: new Date().toISOString(),
+                formData: {
+                    idkb: currentIdkb,
+                    ngayKhaiBao: document.getElementById('ngayKhaiBao').value,
+                    hieuLucTu: document.getElementById('hieuLucTu').value,
+                    luongToiThieu: document.getElementById('luongToiThieu').value,
+                    nhomNgach: document.getElementById('nhomNgach').value,
+                    soBac: document.getElementById('soBac').value,
+                    chenhLechBac: document.getElementById('chenhLechBac').value
+                },
+                chiTietList: chiTietList
+            };
+
+            // Tải danh sách bản nháp
+            loadDraftsFromStorage();
+
+            // Kiểm tra xem có bản nháp nào với cùng ID khai báo không
+            const existingDraftIndex = drafts.findIndex(draft => draft.formData.idkb === currentIdkb);
+
+            if (existingDraftIndex !== -1) {
+                // Hiển thị hộp thoại xác nhận ghi đè
+                Swal.fire({
+                    title: 'ID khai báo đã tồn tại',
+                    text: 'Bạn muốn cập nhật bản nháp hiện có hay tạo bản nháp mới?',
+                    icon: 'question',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Cập nhật',
+                    denyButtonText: 'Tạo mới',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    showLoading('Đang xử lý bản nháp...');
+
+                    if (result.isConfirmed) {
+                        // Ghi đè bản nháp hiện có
+                        drafts[existingDraftIndex] = draftData;
+                        localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+
+                        hideLoading();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã cập nhật bản nháp',
+                            text: 'Bản nháp với ID khai báo này đã được cập nhật!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else if (result.isDenied) {
+                        // Thêm bản nháp mới vào đầu mảng
+                        drafts.unshift(draftData);
+
+                        // Giữ lại chỉ MAX_DRAFTS bản nháp gần đây nhất
+                        if (drafts.length > MAX_DRAFTS) {
+                            drafts = drafts.slice(0, MAX_DRAFTS);
+                        }
+
+                        localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+
+                        hideLoading();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã lưu bản nháp mới',
+                            text: 'Một bản nháp mới đã được tạo với ID khai báo này!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        hideLoading();
+                    }
+                });
+            } else {
+                showLoading('Đang lưu bản nháp...');
+
+                // Thêm bản nháp mới vào đầu mảng
+                drafts.unshift(draftData);
+
+                // Giữ lại chỉ MAX_DRAFTS bản nháp gần đây nhất
+                if (drafts.length > MAX_DRAFTS) {
+                    drafts = drafts.slice(0, MAX_DRAFTS);
+                }
+
+                // Lưu vào localStorage
+                localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+
+                hideLoading();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã lưu bản nháp',
+                    text: 'Dữ liệu đang nhập đã được lưu thành bản nháp mới!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        }
+        // Function to load a specific draft
+        function loadDraft(draftId) {
+            showLoading('Đang tải bản nháp...');
+
+            // Tìm bản nháp được chọn
+            const selectedDraft = drafts.find(draft => draft.id === draftId);
+
+            if (selectedDraft) {
+                // Điền form với dữ liệu bản nháp
+                document.getElementById('idkb').value = selectedDraft.formData.idkb;
+                document.getElementById('ngayKhaiBao').value = selectedDraft.formData.ngayKhaiBao;
+                document.getElementById('hieuLucTu').value = selectedDraft.formData.hieuLucTu;
+                document.getElementById('luongToiThieu').value = selectedDraft.formData.luongToiThieu;
+                document.getElementById('nhomNgach').value = selectedDraft.formData.nhomNgach;
+                document.getElementById('soBac').value = selectedDraft.formData.soBac;
+                document.getElementById('chenhLechBac').value = selectedDraft.formData.chenhLechBac;
+
+                // Khôi phục chiTietList
+                chiTietList = selectedDraft.chiTietList;
+
+                // Nếu có dữ liệu chi tiết, hiển thị nó
+                if (chiTietList.length > 0) {
+                    setTimeout(() => {
+                        createChiTietTableFromDraft();
+                    }, 100);
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã tải bản nháp',
+                    text: 'Dữ liệu bản nháp đã được tải thành công!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Không thể tải bản nháp!',
+                });
+            }
+
+            hideLoading();
+        }
+
+        // Function to load drafts from localStorage
+        function loadDraftsFromStorage() {
+            const storedDrafts = localStorage.getItem(DRAFTS_STORAGE_KEY);
+            if (storedDrafts) {
+                drafts = JSON.parse(storedDrafts);
+            }
+        }
+
+        // Function to recreate detail table from draft data
+        // Sửa hàm createChiTietTableFromDraft
+        function createChiTietTableFromDraft() {
+            // Đảm bảo đã chọn nhóm ngạch
+            const selectedNhomNgach = document.getElementById('nhomNgach').value;
+            if (!selectedNhomNgach) return;
+
+            // Đảm bảo có dữ liệu bản nháp
+            if (chiTietList.length === 0) return;
+
+            // Lấy số bậc
+            const soBac = parseInt(document.getElementById('soBac').value);
+
+            // Lấy giá trị MA NGẠCH duy nhất để xác định số dòng cần thiết
+            const uniqueNgach = [...new Set(chiTietList.map(item => item['MA NGẠCH']))];
+
+            // Xóa bảng hiện tại
+            chiTietTableHead.innerHTML = '';
+            chiTietTableBody.innerHTML = '';
+            choicesInstances = {}; // Xóa instances cũ của Choices.js
+
+            // Tạo dòng header
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+        <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">MÃ NGẠCH</th>
+        <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">NGẠCH</th>
+        <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">VỊ TRÍ</th>
+        <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0 w-40">CHÊNH LỆCH NGẠCH (%)</th>
+        <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">LƯƠNG BẬC 1</th>
+    `;
+
+            // Thêm cột cho mỗi bậc
+            for (let bac = 2; bac <= soBac; bac++) {
+                headerRow.innerHTML += `
+            <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">CHÊNH LỆCH BẬC ${bac} (%)</th>
+            <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">LƯƠNG BẬC ${bac}</th>
+        `;
+            }
+
+            chiTietTableHead.appendChild(headerRow);
+
+            // Cập nhật lại allPositions nếu cần
+            if (allPositions.length === 0 && CaiDatChucDanh.length > 0) {
+                allPositions = [];
+                CaiDatChucDanh.forEach(item => {
+                    const viTri = item['VỊ TRÍ'] || item.VỊ_TRÍ || item['Vị trí'] || item.VI_TRI || '';
+                    if (viTri) {
+                        const positions = viTri.split(',').map(pos => pos.trim()).filter(Boolean);
+                        allPositions.push(...positions);
+                    }
+                });
+                allPositions = [...new Set(allPositions)].sort();
+            }
+
+            // Tạo dòng cho mỗi ngạch duy nhất
+            uniqueNgach.forEach((maNgach, index) => {
+                const rowIndex = index + 1;
+                const items = chiTietList.filter(item => item['MA NGẠCH'] === maNgach);
+
+                if (items.length === 0) return;
+
+                // Lấy item đầu tiên cho thông tin cơ bản
+                const firstItem = items[0];
+
+                const row = document.createElement('tr');
+                row.className = rowIndex % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 transition duration-150' : 'hover:bg-blue-50 transition duration-150';
+
+                // Tìm item có LƯƠNG BẬC 1
+                const bac1Item = items.find(item => item['LƯƠNG BẬC'] === 'LƯƠNG BẬC 1');
+                const luongBac1 = bac1Item ? bac1Item['LƯƠNG'] : 0;
+                const chenhLechNgach = bac1Item ? bac1Item['CHÊNH LỆCH NGẠCH'] : 0;
+
+                // Lấy vị trí đã chọn từ bản nháp
+                const viTriValue = firstItem['VỊ TRÍ'] || '';
+                const selectId = `viTri_${rowIndex}`;
+
+                // Tạo các ô cơ bản
+                row.innerHTML = `
+            <td class="py-3 px-4 border-b border-gray-200 text-gray-800 font-medium sticky left-0 bg-white">${firstItem['MA NGẠCH']}</td>
+            <td class="py-3 px-4 border-b border-gray-200 text-gray-800">${firstItem['NGẠCH']}</td>
+            <td class="py-3 px-4 border-b border-gray-200">
+                <select id="${selectId}" class="choice-multiple w-full" multiple>
+                </select>
+            </td>
+            <td class="py-3 px-4 border-b border-gray-200 w-20">
+                <div class="relative">
+                    <input type="number" id="chenhLechNgach_${rowIndex}" 
+                        class="custom-input w-full p-2 border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-500" 
+                        value="${chenhLechNgach}" 
+                        min="0" max="100" step="0.1"
+                        onchange="updateAllLuongBac(${rowIndex}, ${soBac})">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-gray-500 text-sm">%</span>
+                    </div>
+                </div>
+            </td>
+            <td class="py-3 px-4 border-b border-gray-200 font-medium text-primary-700 text-right">
+                <span id="luongBac_${rowIndex}_1" data-value="${luongBac1}">${formatCurrency(luongBac1)}</span>
+            </td>
+        `;
+
+                // Thêm ô cho mỗi bậc từ bậc 2 trở đi
+                for (let bac = 2; bac <= soBac; bac++) {
+                    const bacItem = items.find(item => item['LƯƠNG BẬC'] === `LƯƠNG BẬC ${bac}`);
+                    if (!bacItem) continue;
+
+                    const luongBac = bacItem['LƯƠNG'];
+                    const chenhLechBac = bacItem['CHÊNH LỆCH BẬC'];
+
+                    row.innerHTML += `
+                <td class="py-3 px-4 border-b border-gray-200 w-40">
+                    <div class="relative">
+                        <input type="number" id="chenhLechBac_${rowIndex}_${bac}" 
+                            class="custom-input w-full p-2 border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-500" 
+                            value="${chenhLechBac}" 
+                            min="0" max="100" step="0.1"
+                            onchange="updateLuongBacTuBac(${rowIndex}, ${bac}, ${soBac})">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500 text-sm">%</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-4 border-b border-gray-200 font-medium text-primary-700 text-right">
+                    <span id="luongBac_${rowIndex}_${bac}" data-value="${luongBac}">${formatCurrency(luongBac)}</span>
+                </td>
+            `;
+                }
+
+                chiTietTableBody.appendChild(row);
+
+                // Khởi tạo Choices.js với giá trị từ bản nháp
+                setTimeout(() => {
+                    const selectElement = document.getElementById(selectId);
+                    if (selectElement) {
+                        const choicesOptions = {
+                            removeItemButton: true,
+                            placeholder: true,
+                            placeholderValue: 'Chọn vị trí...',
+                            searchPlaceholderValue: 'Tìm kiếm...',
+                            itemSelectText: '',
+                            noResultsText: 'Không tìm thấy kết quả',
+                            searchResultLimit: 10,
+                            shouldSort: false
+                        };
+
+                        // Tạo instance Choices.js
+                        const choices = new Choices(selectElement, choicesOptions);
+                        choicesInstances[selectId] = choices;
+
+                        // Tạo danh sách các lựa chọn
+                        const choicesData = allPositions.map(pos => ({
+                            value: pos,
+                            label: pos
+                        }));
+
+                        // Đặt các lựa chọn
+                        choices.setChoices(choicesData, 'value', 'label', true);
+
+                        // Đặt các giá trị đã chọn từ bản nháp
+                        if (viTriValue) {
+                            const selectedPositions = viTriValue.split(',').map(pos => pos.trim()).filter(Boolean);
+                            choices.setValue(selectedPositions);
+                        }
+
+                        // Thêm sự kiện lắng nghe thay đổi
+                        selectElement.addEventListener('change', function () {
+                            updateAvailablePositions();
+                        });
+                    }
+
+                    // Cập nhật danh sách vị trí sau khi tất cả dropdown đã được tạo
+                    if (index === uniqueNgach.length - 1) {
+                        setTimeout(updateAvailablePositions, 100);
+                    }
+                }, 100);
+            });
+
+            // Hiển thị phần chi tiết
+            chiTietSection.classList.remove('hidden');
+
+            // Cập nhật thông báo số dòng
+            dataStatusText.textContent = `Hiển thị ${uniqueNgach.length} ngạch lương với ${soBac} bậc`;
+
+            // Cập nhật trạng thái tiến trình
+            updateProgressSteps(2);
+        }
+
+
+        // Function to show drafts list
+        function showDraftsList() {
+            loadDraftsFromStorage();
+
+            if (drafts.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Không có bản nháp',
+                    text: 'Chưa có bản nháp nào được lưu.'
+                });
+                return;
+            }
+
+            // Create HTML for drafts list
+            let draftsHTML = `
+        <div class="max-h-60 overflow-y-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr>
+                        <th class="py-2 text-left">Thời gian</th>
+                        <th class="py-2 text-left">Nhóm ngạch</th>
+                        <th class="py-2 text-left">Lương tối thiểu</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+            drafts.forEach(draft => {
+                const date = new Date(draft.timestamp);
+                const formattedDate = `${date.toLocaleDateString('vi-VN')} ${date.toLocaleTimeString('vi-VN')}`;
+
+                draftsHTML += `
+            <tr class="hover:bg-gray-100 cursor-pointer" data-draft-id="${draft.id}">
+                <td class="py-2">${formattedDate}</td>
+                <td class="py-2">${draft.formData.nhomNgach || '(Chưa chọn)'}</td>
+                <td class="py-2">${draft.formData.luongToiThieu ? formatCurrency(draft.formData.luongToiThieu) : '(Chưa nhập)'}</td>
+            </tr>
+        `;
+            });
+
+            draftsHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+            Swal.fire({
+                title: 'Danh sách bản nháp',
+                html: draftsHTML,
+                showCancelButton: true,
+                cancelButtonText: 'Đóng',
+                showConfirmButton: false,
+                width: '600px',
+                didOpen: () => {
+                    // Add click event to rows
+                    const rows = Swal.getPopup().querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        row.addEventListener('click', () => {
+                            const draftId = parseInt(row.getAttribute('data-draft-id'));
+                            Swal.close();
+                            loadDraft(draftId);
+                        });
+                    });
+                }
+            });
+        }
+        // Function to delete a draft
+        function deleteDraft(draftId) {
+            loadDraftsFromStorage();
+
+            // Filter out the draft to delete
+            drafts = drafts.filter(draft => draft.id !== draftId);
+
+            // Save updated drafts list
+            localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã xóa bản nháp',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function manageDrafts() {
+            loadDraftsFromStorage();
+
+            if (drafts.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Không có bản nháp',
+                    text: 'Chưa có bản nháp nào được lưu.'
+                });
+                return;
+            }
+
+            showDraftsManagement();
+        }
+
+
+        function showDraftsManagement() {
+            // Tạo HTML cho quản lý bản nháp
+            let draftsHTML = `
+        <div class="max-h-60 overflow-y-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr>
+                        <th class="py-2 text-left">Thời gian</th>
+                        <th class="py-2 text-left">ID Khai báo</th>
+                        <th class="py-2 text-left">Nhóm ngạch</th>
+                        <th class="py-2 text-left">Lương tối thiểu</th>
+                        <th class="py-2 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+            drafts.forEach(draft => {
+                const date = new Date(draft.timestamp);
+                const formattedDate = `${date.toLocaleDateString('vi-VN')} ${date.toLocaleTimeString('vi-VN')}`;
+
+                draftsHTML += `
+            <tr class="hover:bg-gray-100">
+                <td class="py-2">${formattedDate}</td>
+                <td class="py-2">${draft.formData.idkb || '(Không có)'}</td>
+                <td class="py-2">${draft.formData.nhomNgach || '(Chưa chọn)'}</td>
+                <td class="py-2">${draft.formData.luongToiThieu ? formatCurrency(draft.formData.luongToiThieu) : '(Chưa nhập)'}</td>
+                <td class="py-2 text-center">
+                    <button class="text-blue-500 hover:text-blue-700 mr-2 load-draft" data-draft-id="${draft.id}">
+                        <i class="fas fa-download"></i> Tải
+                    </button>
+                    <button class="text-red-500 hover:text-red-700 delete-draft" data-draft-id="${draft.id}">
+                        <i class="fas fa-trash-alt"></i> Xóa
+                    </button>
+                </td>
+            </tr>
+        `;
+            });
+
+            draftsHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+            // Hiển thị hộp thoại quản lý bản nháp
+            Swal.fire({
+                title: 'Quản lý bản nháp',
+                html: draftsHTML,
+                showCancelButton: true,
+                cancelButtonText: 'Đóng',
+                showConfirmButton: false,
+                width: '800px', // Tăng chiều rộng để chứa cột ID khai báo
+                didOpen: () => {
+                    // Thêm sự kiện click cho các nút
+                    const loadButtons = Swal.getPopup().querySelectorAll('.load-draft');
+                    loadButtons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const draftId = parseInt(button.getAttribute('data-draft-id'));
+                            Swal.close();
+                            loadDraft(draftId);
+                        });
+                    });
+
+                    const deleteButtons = Swal.getPopup().querySelectorAll('.delete-draft');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const draftId = parseInt(button.getAttribute('data-draft-id'));
+
+                            Swal.fire({
+                                title: 'Xác nhận xóa',
+                                text: 'Bạn có chắc muốn xóa bản nháp này?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Xóa',
+                                cancelButtonText: 'Hủy'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Xóa bản nháp
+                                    loadDraftsFromStorage();
+                                    drafts = drafts.filter(draft => draft.id !== draftId);
+                                    localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+
+                                    // Kiểm tra nếu không còn bản nháp nào
+                                    if (drafts.length === 0) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Đã xóa bản nháp',
+                                            text: 'Không còn bản nháp nào trong danh sách.',
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        });
+                                    } else {
+                                        // Làm mới dialog quản lý bản nháp
+                                        showDraftsManagement();
+                                    }
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+        }
+
+        // Auto-save function that triggers when window is about to unload
+        function setupAutoSave() {
+            window.addEventListener('beforeunload', function () {
+                // Only save if there's meaningful data
+                if (document.getElementById('luongToiThieu').value ||
+                    document.getElementById('nhomNgach').value) {
+                    saveAsDraft();
+                }
+            });
+        }
+        // Hàm cập nhật lựa chọn vị trí trong tất cả các dropdown
+        // Hàm cập nhật danh sách vị trí còn khả dụng
+        // Hàm cập nhật danh sách vị trí còn khả dụng
+        function updateAvailablePositions() {
+            console.log("Cập nhật danh sách vị trí khả dụng...");
+
+            // Xác định các vị trí đã được gán
+            assignedPositions.clear();
+            Object.keys(choicesInstances).forEach(selectId => {
+                const choices = choicesInstances[selectId];
+                if (choices && typeof choices.getValue === 'function') {
+                    const selected = choices.getValue().map(choice => choice.value);
+                    selected.forEach(pos => assignedPositions.add(pos));
+                }
+            });
+
+            console.log("Các vị trí đã được gán:", Array.from(assignedPositions));
+
+            // Cập nhật tất cả các dropdown
+            Object.keys(choicesInstances).forEach(selectId => {
+                const choices = choicesInstances[selectId];
+                if (!choices || typeof choices.getValue !== 'function') return;
+
+                // Các vị trí hiện tại đã chọn cho dropdown này
+                const currentSelected = choices.getValue().map(choice => choice.value);
+
+                // Tạo danh sách các lựa chọn mới:
+                // 1. Bao gồm tất cả các vị trí chưa được gán ở bất kỳ đâu
+                // 2. Cộng với các vị trí đã được chọn trong dropdown này
+                let availableChoices = allPositions.filter(pos => {
+                    // Chỉ giữ lại các vị trí HOẶC chưa được gán cho ai HOẶC đã được chọn trong dropdown này
+                    return !assignedPositions.has(pos) || currentSelected.includes(pos);
+                }).map(pos => {
+                    return {
+                        value: pos,
+                        label: pos,
+                        selected: currentSelected.includes(pos)
+                    };
+                });
+
+                // Cập nhật dropdown bằng danh sách mới
+                choices.clearStore();
+                choices.setChoices(availableChoices, 'value', 'label', true);
+            });
+        }
+        // Hàm cập nhật lựa chọn vị trí trong tất cả các dropdown
+        function updatePositionChoices() {
+            console.log("Cập nhật lựa chọn vị trí...");
+            // Xóa trạng thái lựa chọn hiện tại
+            selectedPositions = {};
+
+            // Thu thập tất cả các vị trí đã được chọn
+            Object.keys(choicesInstances).forEach(selectId => {
+                const choices = choicesInstances[selectId];
+                if (choices && typeof choices.getValue === 'function') {
+                    const selected = choices.getValue().map(choice => choice.value);
+
+                    // Lưu trữ các vị trí đã chọn theo selectId
+                    if (selected.length > 0) {
+                        selectedPositions[selectId] = selected;
+                        console.log(`${selectId} đã chọn:`, selected);
+                    }
+                }
+            });
+
+            // Cập nhật tất cả các dropdown
+            Object.keys(choicesInstances).forEach(selectId => {
+                const choices = choicesInstances[selectId];
+                if (!choices || typeof choices.getValue !== 'function') return;
+
+                const currentSelected = choices.getValue().map(choice => choice.value);
+                console.log(`${selectId} đang chọn:`, currentSelected);
+
+                // Tạo danh sách vị trí khả dụng (bắt đầu với tất cả các vị trí)
+                let availablePositions = [...viTriOptions];
+
+                // Loại bỏ các vị trí đã được chọn bởi các dropdown khác
+                Object.keys(selectedPositions).forEach(otherSelectId => {
+                    if (otherSelectId !== selectId) {
+                        selectedPositions[otherSelectId].forEach(pos => {
+                            availablePositions = availablePositions.filter(p => p !== pos);
+                        });
+                    }
+                });
+
+                // Thêm lại các vị trí hiện tại đã chọn để tránh mất chúng
+                const combinedPositions = [...availablePositions];
+                currentSelected.forEach(pos => {
+                    if (!combinedPositions.includes(pos)) {
+                        combinedPositions.push(pos);
+                    }
+                });
+
+                // Log thông tin để debug
+                console.log(`${selectId} có sẵn:`, combinedPositions);
+
+                // Cập nhật các lựa chọn
+                const choicesData = combinedPositions.map(item => {
+                    return {
+                        value: item,
+                        label: item,
+                        selected: currentSelected.includes(item)
+                    };
+                });
+
+                // Cập nhật dropdown
+                choices.clearChoices();
+                choices.setChoices(choicesData, 'value', 'label', true);
+            });
+        }
+
+
+        function decrementValue(id, min = 1) {
+            const input = document.getElementById(id);
+            let value = parseInt(input.value) || 0;
+            if (value > min) {
+                input.value = value - 1;
+                input.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Hàm cập nhật trạng thái tiến trình
+        function updateProgressSteps(step) {
+            if (step >= 1) {
+                progress1.style.width = '100%';
+            } else {
+                progress1.style.width = '0%';
+            }
+
+            if (step >= 2) {
+                step2.classList.remove('bg-gray-300', 'text-gray-600');
+                step2.classList.add('bg-primary-600', 'text-white');
+                progress2.style.width = '100%';
+            } else {
+                step2.classList.add('bg-gray-300', 'text-gray-600');
+                step2.classList.remove('bg-primary-600', 'text-white');
+                progress2.style.width = '0%';
+            }
+
+            if (step >= 3) {
+                step3.classList.remove('bg-gray-300', 'text-gray-600');
+                step3.classList.add('bg-primary-600', 'text-white');
+            } else {
+                step3.classList.add('bg-gray-300', 'text-gray-600');
+                step3.classList.remove('bg-primary-600', 'text-white');
+            }
+        }
+
+        async function loadCaiDatChucDanh() {
+            try {
+                showLoading('Đang tải dữ liệu chức danh...');
+
+                const response = await axios({
+                    method: 'POST',
+                    url: `https://www.appsheet.com/api/v2/apps/${appId}/tables/CaiDat_ChucDanh/Action`,
+                    headers: {
+                        'ApplicationAccessKey': ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        "Action": "Find",
+                        "Properties": {
+                            "Locale": "vi-VN",
+                            "Timezone": "Asia/Ho_Chi_Minh",
+                            "Selector": "Filter(CaiDat_ChucDanh, true)"
+                        }
+                    }
+                });
+
+                console.log('Phản hồi API CaiDat_ChucDanh:', response.data);
+                viTriOptions = [];
+                // Xử lý dữ liệu nhận được
+                if (response.data && response.data.Rows) {
+                    CaiDatChucDanh = response.data.Rows;
+                } else if (Array.isArray(response.data)) {
+                    CaiDatChucDanh = response.data;
+                } else {
+                    console.error('Cấu trúc dữ liệu CaiDat_ChucDanh không đúng:', response.data);
+                    CaiDatChucDanh = [];
+                    hideLoading();
+                    return;
+                }
+
+                console.log('Dữ liệu CaiDat_ChucDanh đã tải:', CaiDatChucDanh);
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                console.error('Lỗi khi tải dữ liệu CaiDat_ChucDanh:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể tải dữ liệu chức danh! Vui lòng thử lại sau.',
+                    confirmButtonColor: '#0ea5e9'
+                });
+            }
+        }
+
+        // Sửa lại hàm định dạng tiền tệ
+        function formatCurrency(amount) {
+            // Làm tròn số lên hàng chục ngàn
+            const roundedAmount = roundToTenThousand(amount);
+
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(roundedAmount);
+        }
+
+        // Hàm tạo ID khai báo theo định dạng KB-YYYYMMDD-XXX (XXX là số ngẫu nhiên)
+        function generateKhaiBaoID() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+            return `KB-${year}${month}${day}-${randomNum}`;
+        }
+
+        // Hàm tạo IDKBDE
+        function generateKhaiBaoDEID(idkb, index) {
+            return `${idkb}-DE${String(index).padStart(3, '0')}`;
+        }
+
+        // Hàm định dạng ngày theo định dạng yyyy-mm-dd
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        // Hàm tải dữ liệu CaiDatNL từ API
+        async function loadCaiDatNL() {
+            try {
+                showLoading('Đang tải dữ liệu ngạch lương...');
+
+                const response = await axios({
+                    method: 'POST',
+                    url: `https://www.appsheet.com/api/v2/apps/${appId}/tables/CaiDatNL/Action`,
+                    headers: {
+                        'ApplicationAccessKey': ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        "Action": "Find",
+                        "Properties": {
+                            "Locale": "vi-VN",
+                            "Timezone": "Asia/Ho_Chi_Minh",
+                            "Selector": "Filter(CaiDatNL, true)"
+                        }
+                    }
+                });
+
+                console.log('Phản hồi API thô:', response.data);
+
+                // Xử lý dữ liệu nhận được
+                if (response.data && response.data.Rows) {
+                    CaiDatNL = response.data.Rows;
+                } else if (Array.isArray(response.data)) {
+                    CaiDatNL = response.data;
+                } else {
+                    console.error('Cấu trúc dữ liệu không đúng:', response.data);
+                    CaiDatNL = [];
+                    hideLoading();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi dữ liệu',
+                        text: 'Dữ liệu CaiDatNL không đúng định dạng!',
+                        confirmButtonColor: '#0ea5e9'
+                    });
+                    return;
+                }
+
+                console.log('Dữ liệu CaiDatNL đã tải:', CaiDatNL);
+
+                // Kiểm tra xem có dữ liệu không
+                if (CaiDatNL.length === 0) {
+                    console.error('Không có dữ liệu CaiDatNL!');
+                    hideLoading();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Không có dữ liệu',
+                        text: 'Không tìm thấy dữ liệu cài đặt ngạch lương!',
+                        confirmButtonColor: '#0ea5e9'
+                    });
+                    return;
+                }
+
+                // Lấy danh sách các nhóm ngạch duy nhất
+                const nhomNgachList = [...new Set(CaiDatNL.map(item => item.NHOM || item['NHOM']).filter(Boolean))];
+
+                // Kiểm tra xem có nhóm ngạch nào không
+                if (nhomNgachList.length === 0) {
+                    console.error('Không có nhóm ngạch nào!');
+                    hideLoading();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Không có dữ liệu',
+                        text: 'Không tìm thấy nhóm ngạch nào trong dữ liệu!',
+                        confirmButtonColor: '#0ea5e9'
+                    });
+                    return;
+                }
+
+                // Điền vào dropdown với giao diện nâng cao
+                nhomNgachSelect.innerHTML = '<option value="">-- Chọn nhóm ngạch --</option>';
+
+                nhomNgachList.forEach(nhom => {
+                    const option = document.createElement('option');
+                    option.value = nhom;
+                    option.textContent = nhom;
+                    nhomNgachSelect.appendChild(option);
+                });
+
+                hideLoading();
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Dữ liệu ngạch lương đã được tải thành công!'
+                });
+
+            } catch (error) {
+                hideLoading();
+                console.error('Lỗi khi tải dữ liệu CaiDatNL:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể tải danh sách nhóm ngạch! Lỗi: ' + (error.message || 'Không xác định'),
+                    confirmButtonColor: '#0ea5e9'
+                });
+            }
+        }
+
+        // Hàm điền các giá trị mặc định
+        function setDefaultValues() {
+            // Tạo ID khai báo
+            document.getElementById('idkb').value = generateKhaiBaoID();
+
+            // Đặt ngày khai báo là ngày hiện tại
+            const today = new Date();
+            document.getElementById('ngayKhaiBao').value = formatDate(today);
+
+            // Mặc định hiệu lực từ cũng là ngày hiện tại
+            document.getElementById('hieuLucTu').value = formatDate(today);
+
+            // Cập nhật trạng thái tiến trình
+            updateProgressSteps(1);
+        }
+
+        // Hàm tạo bảng chi tiết dựa trên nhóm ngạch đã chọn
+        function createChiTietTable(nhomNgach) {
+            // Lọc dữ liệu theo nhóm ngạch
+            const filteredData = CaiDatNL.filter(item =>
+                (item.NHOM === nhomNgach || item['NHOM'] === nhomNgach)
+            );
+
+            console.log("Dữ liệu đã lọc theo nhóm", nhomNgach, ":", filteredData);
+
+            const soBac = parseInt(document.getElementById('soBac').value);
+            const luongToiThieu = parseFloat(document.getElementById('luongToiThieu').value);
+            const chenhLechBacMacDinh = parseFloat(document.getElementById('chenhLechBac').value);
+            const idkb = document.getElementById('idkb').value;
+
+            if (!soBac || !luongToiThieu || !chenhLechBacMacDinh) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin',
+                    text: 'Vui lòng nhập đầy đủ thông tin số bậc, lương tối thiểu và chênh lệch bậc!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            if (soBac < 1 || soBac > 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giá trị không hợp lệ',
+                    text: 'Số bậc phải từ 1 đến 10!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            // Xóa dữ liệu cũ trong bảng chi tiết
+            chiTietTableHead.innerHTML = '';
+            chiTietTableBody.innerHTML = '';
+            chiTietList = [];
+            choicesInstances = {};
+
+            // Tạo header cho bảng
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+    <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">MÃ NGẠCH</th>
+    <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">NGẠCH</th>
+    <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">VỊ TRÍ</th>
+    <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0 w-40">CHÊNH LỆCH NGẠCH (%)</th>
+    <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">LƯƠNG BẬC 1</th>
+`;
+
+            // Thêm các cột cho các bậc lương từ bậc 2 trở đi và chênh lệch bậc
+            for (let bac = 2; bac <= soBac; bac++) {
+                headerRow.innerHTML += `
+                   <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">CHÊNH LỆCH BẬC ${bac} (%)</th>
+                   <th class="py-3 px-4 border-b border-gray-300 text-left bg-gradient-to-r from-blue-50 to-blue-100 font-medium text-gray-700 sticky top-0">LƯƠNG BẬC ${bac}</th>
+               `;
+            }
+
+            chiTietTableHead.appendChild(headerRow);
+
+            // Kiểm tra xem có dữ liệu sau khi lọc không
+            if (filteredData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Không có dữ liệu',
+                    text: 'Không tìm thấy dữ liệu cho nhóm ngạch đã chọn!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            // Lấy tất cả vị trí có sẵn từ CaiDatChucDanh
+            allPositions = [];
+            assignedPositions.clear();
+
+            if (CaiDatChucDanh.length > 0) {
+                CaiDatChucDanh.forEach(item => {
+                    const viTri = item['VỊ TRÍ'] || item.VỊ_TRÍ || item['Vị trí'] || item.VI_TRI || '';
+                    if (viTri) {
+                        const positions = viTri.split(',').map(pos => pos.trim()).filter(Boolean);
+                        allPositions.push(...positions);
+                    }
+                });
+
+                // Loại bỏ trùng lặp và sắp xếp
+                allPositions = [...new Set(allPositions)].sort();
+                console.log('Danh sách vị trí (không trùng lặp):', allPositions);
+            }
+
+            // Tạo dữ liệu chi tiết cho mỗi ngạch
+            let index = 1;
+            filteredData.forEach(ngach => {
+                // Truy cập các trường dữ liệu, hỗ trợ cả hai kiểu truy cập
+                const maNgach = ngach['MA NGẠCH'] || ngach.MA_NGẠCH || '';
+                const tenNgach = ngach.NGẠCH || ngach['NGẠCH'] || '';
+
+                // Lấy giá trị mặc định của vị trí từ dữ liệu ngạch
+                const viTriMacDinh = ngach['VỊ TRÍ'] || ngach.VỊ_TRÍ || '';
+
+                // Mặc định chênh lệch ngạch là 0%, người dùng sẽ nhập sau
+                const chenhLechNgachMacDinh = 0;
+                // Mặc định chênh lệch bậc 1 là 0%
+                const chenhLechBac1 = 0;
+
+                // Tạo dòng cho ngạch này
+                const row = document.createElement('tr');
+                row.className = index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 transition duration-150' : 'hover:bg-blue-50 transition duration-150';
+
+                // Tính lương bậc 1
+                const luongBac1 = Math.round(luongToiThieu * (1 + chenhLechNgachMacDinh / 100));
+
+                // Chuẩn bị dữ liệu cho select vị trí
+                const selectId = `viTri_${index}`;
+                let defaultPositions = [];
+                if (viTriMacDinh) {
+                    defaultPositions = viTriMacDinh.split(',').map(item => item.trim());
+                }
+
+                // Thay đổi phần input cho CHÊNH LỆCH NGẠCH để giới hạn giá trị từ 0-100
+                row.innerHTML = `
+    <td class="py-3 px-4 border-b border-gray-200 text-gray-800 font-medium sticky left-0 bg-white">${maNgach}</td>
+    <td class="py-3 px-4 border-b border-gray-200 text-gray-800">${tenNgach}</td>
+    <td class="py-3 px-4 border-b border-gray-200">
+        <select id="${selectId}" class="choice-multiple w-full" multiple>
+        </select>
+    </td>
+    <td class="py-3 px-4 border-b border-gray-200 w-20 ">
+        <div class="relative">
+            <input type="number" id="chenhLechNgach_${index}" 
+                class="custom-input w-full p-2 border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-500" 
+                value="${chenhLechNgachMacDinh}" 
+                min="0" max="100" step="0.1"
+                onchange="updateAllLuongBac(${index}, ${soBac})">
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span class="text-gray-500 text-sm">%</span>
+            </div>
+        </div>
+    </td>
+    <td class="py-3 px-4 border-b border-gray-200 font-medium text-primary-700 text-right">
+        <span id="luongBac_${index}_1" data-value="${luongBac1}">${formatCurrency(luongBac1)}</span>
+    </td>
+`;
+
+
+                // Thêm chi tiết bậc 1 vào danh sách
+                chiTietList.push({
+                    IDKBDE: generateKhaiBaoDEID(idkb, index * 100 + 1),
+                    IDKB: idkb,
+                    'MA NGẠCH': maNgach,
+                    'NGẠCH': tenNgach,
+                    'VỊ TRÍ': viTriMacDinh, // Giá trị mặc định, sẽ được cập nhật khi lưu
+                    'CHÊNH LỆCH NGẠCH': chenhLechNgachMacDinh,
+                    'LƯƠNG BẬC': 'LƯƠNG BẬC 1',
+                    'CHÊNH LỆCH BẬC': chenhLechBac1,
+                    'LƯƠNG': luongBac1
+                });
+
+                // Thêm các ô nhập cho từng bậc lương và chênh lệch bậc từ bậc 2 trở đi
+                let luongBacTruoc = luongBac1;
+                for (let bac = 2; bac <= soBac; bac++) {
+                    // Giá trị mặc định cho chênh lệch bậc (lấy từ form)
+                    const chenhLechBacValue = chenhLechBacMacDinh;
+
+                    // Tính lương bậc
+                    // Lương bậc n = lương bậc (n-1) + lương bậc (n-1) * chênh lệch bậc/100
+                    const luongBac = Math.round(luongBacTruoc + luongBacTruoc * (chenhLechBacValue / 100));
+
+                    // Tương tự, thêm giới hạn min, max, step cho các input CHÊNH LỆCH BẬC
+                    row.innerHTML += `
+    <td class="py-3 px-4 border-b border-gray-200 w-40">
+        <div class="relative">
+            <input type="number" id="chenhLechBac_${index}_${bac}" 
+                class="custom-input w-full p-2 border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-500" 
+                value="${chenhLechBacValue}" 
+                min="0" max="100" step="0.1"
+                onchange="updateLuongBacTuBac(${index}, ${bac}, ${soBac})">
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span class="text-gray-500 text-sm">%</span>
+            </div>
+        </div>
+    </td>
+    <td class="py-3 px-4 border-b border-gray-200 font-medium text-primary-700 text-right">
+        <span id="luongBac_${index}_${bac}" data-value="${luongBac}">${formatCurrency(luongBac)}</span>
+    </td>
+`;
+
+                    // Tạo dữ liệu chi tiết để lưu vào API - một dòng cho mỗi bậc
+                    const chiTietItem = {
+                        IDKBDE: generateKhaiBaoDEID(idkb, index * 100 + bac),
+                        IDKB: idkb,
+                        'MA NGẠCH': maNgach,
+                        'NGẠCH': tenNgach,
+                        'VỊ TRÍ': viTriMacDinh, // Giá trị mặc định, sẽ được cập nhật khi lưu
+                        'CHÊNH LỆCH NGẠCH': chenhLechNgachMacDinh,
+                        'LƯƠNG BẬC': 'LƯƠNG BẬC ' + bac,
+                        'CHÊNH LỆCH BẬC': chenhLechBacValue,
+                        'LƯƠNG': luongBac
+                    };
+
+                    chiTietList.push(chiTietItem);
+                    luongBacTruoc = luongBac;
+                }
+
+                chiTietTableBody.appendChild(row);
+
+                // Chuẩn bị cho việc khởi tạo Choices.js sau khi thêm vào DOM
+                // Thay đổi phần khởi tạo Choices.js
+                setTimeout(() => {
+                    const selectElement = document.getElementById(selectId);
+                    const choicesOptions = {
+                        removeItemButton: true,
+                        placeholder: true,
+                        placeholderValue: 'Chọn vị trí...',
+                        searchPlaceholderValue: 'Tìm kiếm...',
+                        itemSelectText: '',
+                        noResultsText: 'Không tìm thấy kết quả',
+                        searchResultLimit: 10,
+                        shouldSort: false,  // Không sắp xếp lại để giữ thứ tự
+                        renderChoiceLimit: -1,  // Không giới hạn số lượng hiển thị
+                        callbackOnCreateTemplates: function (template) {
+                            return {
+                                choice: (classNames, data) => {
+                                    return template(`
+                        <div class="${classNames.item} ${classNames.itemChoice} ${data.disabled ? classNames.itemDisabled : classNames.itemSelectable
+                                        } ${data.selected ? classNames.selectedState : ''}" 
+                        data-select-text="${data.selectText}" data-choice ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'
+                                        } data-id="${data.id}" data-value="${data.value}" ${data.groupId > 0 ? 'role="treeitem"' : 'role="option"'
+                                        }>
+                            ${data.label}
+                        </div>
+                    `);
+                                }
+                            };
+                        }
+                    };
+
+                    // Tạo instance Choices.js
+                    const choices = new Choices(selectElement, choicesOptions);
+
+                    // Lưu instance để sử dụng sau này
+                    choicesInstances[selectId] = choices;
+
+                    // Thêm sự kiện lắng nghe thay đổi
+                    selectElement.addEventListener('change', function () {
+                        // Cập nhật danh sách vị trí khả dụng
+                        updateAvailablePositions();
+                    });
+
+                    // Cập nhật danh sách vị trí khả dụng sau khi tất cả dropdown đã được tạo
+                    if (Object.keys(choicesInstances).length === filteredData.length) {
+                        setTimeout(updateAvailablePositions, 100);
+                    }
+                }, 100);
+                index++;
+            });
+
+            // Hiển thị bảng chi tiết
+            chiTietSection.classList.remove('hidden');
+
+            // Cập nhật thông báo số dòng dữ liệu
+            dataStatusText.textContent = `Hiển thị ${filteredData.length} ngạch lương với ${soBac} bậc`;
+
+            // Cập nhật trạng thái tiến trình
+            updateProgressSteps(2);
+        }
+
+        // Hàm cập nhật lương bậc khi thay đổi chênh lệch ngạch
+        function updateAllLuongBac(rowIndex, soBac) {
+            const luongToiThieu = parseFloat(document.getElementById('luongToiThieu').value);
+            const chenhLechNgachValue = parseFloat(document.getElementById(`chenhLechNgach_${rowIndex}`).value) || 0;
+
+            // Giá trị cố định cho chênh lệch bậc 1
+            const chenhLechBac1 = 0;
+
+            // Cập nhật lương bậc 1
+            const luongBac1 = Math.round(luongToiThieu * (1 + chenhLechNgachValue / 100));
+            const luongBac1Element = document.getElementById(`luongBac_${rowIndex}_1`);
+            luongBac1Element.textContent = formatCurrency(luongBac1);
+            luongBac1Element.dataset.value = luongBac1;
+
+            // Cập nhật dữ liệu trong chiTietList cho bậc 1
+            const maNgach = document.querySelectorAll(`#chiTietTableBody tr`)[rowIndex - 1].cells[0].textContent;
+            const chiTietItemBac1 = chiTietList.find(item =>
+                item['MA NGẠCH'] === maNgach &&
+                item['LƯƠNG BẬC'] === 'LƯƠNG BẬC 1'
+            );
+
+            if (chiTietItemBac1) {
+                chiTietItemBac1['CHÊNH LỆCH NGẠCH'] = chenhLechNgachValue;
+                chiTietItemBac1['LƯƠNG'] = luongBac1;
+            }
+
+            // Cập nhật tất cả các bậc lương cho ngạch này từ bậc 2 trở đi
+            let luongBacTruoc = luongBac1;
+            for (let bac = 2; bac <= soBac; bac++) {
+                const chenhLechBacValue = parseFloat(document.getElementById(`chenhLechBac_${rowIndex}_${bac}`).value) || 0;
+
+                // Lương bậc n = lương bậc (n-1) + lương bậc (n-1) * chênh lệch bậc/100
+                const luongBac = Math.round(luongBacTruoc + luongBacTruoc * (chenhLechBacValue / 100));
+
+                // Cập nhật hiển thị
+                const luongBacElement = document.getElementById(`luongBac_${rowIndex}_${bac}`);
+                luongBacElement.textContent = formatCurrency(luongBac);
+                luongBacElement.dataset.value = luongBac;
+
+                // Cập nhật dữ liệu trong chiTietList
+                const chiTietItem = chiTietList.find(item =>
+                    item['MA NGẠCH'] === maNgach &&
+                    item['LƯƠNG BẬC'] === 'LƯƠNG BẬC ' + bac
+                );
+
+                if (chiTietItem) {
+                    chiTietItem['CHÊNH LỆCH NGẠCH'] = chenhLechNgachValue;
+                    chiTietItem['LƯƠNG'] = luongBac;
+                }
+
+                luongBacTruoc = luongBac;
+            }
+        }
+
+        // Hàm cập nhật lương bậc từ một bậc cụ thể (khi thay đổi chênh lệch bậc)
+        function updateLuongBacTuBac(rowIndex, bacIndex, soBac) {
+            if (bacIndex < 2) return; // Không áp dụng cho bậc 1
+
+            const maNgach = document.querySelectorAll(`#chiTietTableBody tr`)[rowIndex - 1].cells[0].textContent;
+
+            // Lấy lương bậc trước đó
+            const luongBacTruocElement = document.getElementById(`luongBac_${rowIndex}_${bacIndex - 1}`);
+            const luongBacTruoc = parseFloat(luongBacTruocElement.dataset.value);
+
+            // Lấy chênh lệch bậc hiện tại
+            const chenhLechBacValue = parseFloat(document.getElementById(`chenhLechBac_${rowIndex}_${bacIndex}`).value) || 0;
+
+            // Tính lương bậc mới
+            const luongBac = Math.round(luongBacTruoc + luongBacTruoc * (chenhLechBacValue / 100));
+
+            // Cập nhật hiển thị
+            const luongBacElement = document.getElementById(`luongBac_${rowIndex}_${bacIndex}`);
+            luongBacElement.textContent = formatCurrency(luongBac);
+            luongBacElement.dataset.value = luongBac;
+
+            // Cập nhật dữ liệu trong chiTietList
+            const chiTietItem = chiTietList.find(item =>
+                item['MA NGẠCH'] === maNgach &&
+                item['LƯƠNG BẬC'] === 'LƯƠNG BẬC ' + bacIndex
+            );
+
+            if (chiTietItem) {
+                chiTietItem['CHÊNH LỆCH BẬC'] = chenhLechBacValue;
+                chiTietItem['LƯƠNG'] = luongBac;
+            }
+
+            // Cập nhật các bậc tiếp theo nếu có
+            if (bacIndex < soBac) {
+                let nextLuongBacTruoc = luongBac;
+                // Tiếp tục cập nhật các bậc sau
+                for (let bac = bacIndex + 1; bac <= soBac; bac++) {
+                    const nextChenhLechBacValue = parseFloat(document.getElementById(`chenhLechBac_${rowIndex}_${bac}`).value) || 0;
+
+                    // Tính lương bậc tiếp theo
+                    const nextLuongBac = Math.round(nextLuongBacTruoc + nextLuongBacTruoc * (nextChenhLechBacValue / 100));
+
+                    // Cập nhật hiển thị
+                    const nextLuongBacElement = document.getElementById(`luongBac_${rowIndex}_${bac}`);
+                    nextLuongBacElement.textContent = formatCurrency(nextLuongBac);
+                    nextLuongBacElement.dataset.value = nextLuongBac;
+
+                    // Cập nhật dữ liệu trong chiTietList
+                    const nextChiTietItem = chiTietList.find(item =>
+                        item['MA NGẠCH'] === maNgach &&
+                        item['LƯƠNG BẬC'] === 'LƯƠNG BẬC ' + bac
+                    );
+
+                    if (nextChiTietItem) {
+                        nextChiTietItem['LƯƠNG'] = nextLuongBac;
+                    }
+
+                    nextLuongBacTruoc = nextLuongBac;
+                }
+            }
+        }
+        // Hàm làm tròn số tiền lên hàng chục ngàn (5 chữ số)
+        function roundToTenThousand(amount) {
+            return Math.ceil(amount / 10000) * 10000;
+        }
+        // Hàm làm mới form
+        function resetForm() {
+            setDefaultValues();
+            document.getElementById('luongToiThieu').value = '';
+            document.getElementById('nhomNgach').value = '';
+            document.getElementById('soBac').value = '';
+            document.getElementById('chenhLechBac').value = '';
+            chiTietSection.classList.add('hidden');
+            chiTietList = [];
+            choicesInstances = {};
+            updateProgressSteps(1);
+        }
+
+        // Sự kiện khi nhấn nút tạo chi tiết
+        btnTaoChiTiet.addEventListener('click', function () {
+            const selectedNhomNgach = nhomNgachSelect.value;
+            if (selectedNhomNgach) {
+                showLoading('Đang tạo bảng chi tiết...');
+                setTimeout(() => {
+                    createChiTietTable(selectedNhomNgach);
+                    hideLoading();
+
+                    // Hiệu ứng scroll mượt đến phần chi tiết
+                    setTimeout(() => {
+                        chiTietSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                }, 500); // Thêm timeout nhỏ để hiện loading
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa chọn nhóm ngạch',
+                    text: 'Vui lòng chọn nhóm ngạch trước khi tạo chi tiết!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+            }
+        });
+
+        // Sự kiện khi nhấn nút Làm mới
+        resetFormBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Xác nhận làm mới',
+                text: 'Bạn có chắc muốn làm mới toàn bộ form không?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0ea5e9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resetForm();
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Đã làm mới form thành công!'
+                    });
+                }
+            });
+        });
+
+        // Sự kiện khi nhấn nút Hủy
+        cancelBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Xác nhận hủy',
+                text: 'Bạn có chắc muốn hủy bảng chi tiết hiện tại không?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0ea5e9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Không'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    chiTietSection.classList.add('hidden');
+                    chiTietList = [];
+                    choicesInstances = {};
+                    updateProgressSteps(1);
+                }
+            });
+        });
+
+        // Sự kiện khi nhấn nút Nhập dữ liệu
+        importBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Chức năng đang phát triển',
+                text: 'Tính năng nhập dữ liệu sẽ được cập nhật trong phiên bản tới',
+                icon: 'info',
+                confirmButtonColor: '#0ea5e9'
+            });
+        });
+
+        // Sự kiện khi nhấn nút Xuất báo cáo
+        exportBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Chức năng đang phát triển',
+                text: 'Tính năng xuất báo cáo sẽ được cập nhật trong phiên bản tới',
+                icon: 'info',
+                confirmButtonColor: '#0ea5e9'
+            });
+        });
+
+        // Xử lý sự kiện lưu tất cả
+        saveAllBtn.addEventListener('click', async function () {
+            // Lấy dữ liệu từ form
+            khaiBaoData = {
+                IDKB: document.getElementById('idkb').value,
+                'NGÀY KHAI BÁO': document.getElementById('ngayKhaiBao').value,
+                'HIỆU LỰC TỪ': document.getElementById('hieuLucTu').value,
+                'LƯƠNG TỐI THIỂU': parseFloat(document.getElementById('luongToiThieu').value),
+                'NHÓM NGẠCH': document.getElementById('nhomNgach').value,
+                'SỐ BẬC': parseInt(document.getElementById('soBac').value),
+                'CHÊNH LỆCH CÁC BẬC': parseFloat(document.getElementById('chenhLechBac').value)
+            };
+
+            // Kiểm tra dữ liệu
+            if (!khaiBaoData['NHÓM NGẠCH']) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin',
+                    text: 'Vui lòng chọn nhóm ngạch!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            if (!khaiBaoData['LƯƠNG TỐI THIỂU'] || !khaiBaoData['SỐ BẬC'] || !khaiBaoData['CHÊNH LỆCH CÁC BẬC']) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin',
+                    text: 'Vui lòng điền đầy đủ thông tin!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            if (chiTietList.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa có chi tiết',
+                    text: 'Vui lòng tạo chi tiết trước khi lưu!',
+                    confirmButtonColor: '#0ea5e9'
+                });
+                return;
+            }
+
+            try {
+                // Cập nhật trạng thái tiến trình
+                updateProgressSteps(3);
+                showLoading('Đang lưu dữ liệu...');
+
+                // Cập nhật dữ liệu vị trí từ các dropdown Choices.js
+                const rows = document.querySelectorAll('#chiTietTableBody tr');
+                rows.forEach((row, rowIndex) => {
+                    const maNgach = row.cells[0].textContent;
+                    const selectId = `viTri_${rowIndex + 1}`;
+                    let viTriValue = "";
+
+                    // Lấy giá trị đã chọn từ Choices.js
+                    if (choicesInstances[selectId]) {
+                        const selectedValues = choicesInstances[selectId].getValue().map(choice => choice.value);
+                        viTriValue = selectedValues.join(', ');
+                    }
+
+                    // Cập nhật tất cả các chi tiết liên quan đến mã ngạch này
+                    chiTietList.filter(item => item['MA NGẠCH'] === maNgach).forEach(item => {
+                        item['VỊ TRÍ'] = viTriValue;
+                    });
+                });
+
+                // Bước 1: Lưu bảng cha KhaibaoTBL
+                const responseKhaiBao = await axios({
+                    method: 'POST',
+                    url: `https://www.appsheet.com/api/v2/apps/${appId}/tables/KhaibaoTBL/Action`,
+                    headers: {
+                        'ApplicationAccessKey': ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        "Action": "Add",
+                        "Properties": {
+                            "Locale": "vi-VN",
+                            "Timezone": "Asia/Ho_Chi_Minh"
+                        },
+                        "Rows": [khaiBaoData]
+                    }
+                });
+
+                console.log('Lưu bảng cha thành công:', responseKhaiBao.data);
+                console.log('Dữ liệu chi tiết:', chiTietList);
+
+                // Bước 2: Lưu bảng con KhaibaoTBLDE
+                const responseChiTiet = await axios({
+                    method: 'POST',
+                    url: `https://www.appsheet.com/api/v2/apps/${appId}/tables/KhaibaoTBLDE/Action`,
+                    headers: {
+                        'ApplicationAccessKey': ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        "Action": "Add",
+                        "Properties": {
+                            "Locale": "vi-VN",
+                            "Timezone": "Asia/Ho_Chi_Minh"
+                        },
+                        "Rows": chiTietList
+                    }
+                });
+
+                console.log('Lưu bảng con thành công:', responseChiTiet.data);
+
+                hideLoading();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Lưu thành công!',
+                    text: 'Đã lưu tất cả thông tin thành công!',
+                    confirmButtonColor: '#0ea5e9'
+                }).then((result) => {
+                    // Reset form sau khi lưu thành công
+                    resetForm();
+                });
+
+            } catch (error) {
+                hideLoading();
+                console.error('Lỗi khi lưu dữ liệu:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi lưu thông tin! ' + (error.response?.data?.message || error.message || 'Vui lòng thử lại.'),
+                    confirmButtonColor: '#d33'
+                });
+
+                // Quay lại bước 2
+                updateProgressSteps(2);
+            }
+        });
+        document.getElementById('khaiBaoForm').querySelector('.flex.justify-end').innerHTML += `
+    <button type="button" id="saveDraftBtn" 
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2 transition duration-200 flex items-center">
+        <i class="fas fa-save mr-2"></i> Lưu nháp
+    </button>
+    <button type="button" id="loadDraftBtn" 
+        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-200 flex items-center">
+        <i class="fas fa-folder-open mr-2"></i> Tải nháp
+    </button>
+`;
+
+        // Add event listeners for the new buttons
+        document.getElementById('saveDraftBtn').addEventListener('click', saveAsDraft);
+        document.getElementById('loadDraftBtn').addEventListener('click', showDraftsList);
+        // Export functions for global access
+        window.updateAllLuongBac = updateAllLuongBac;
+        window.updateLuongBacTuBac = updateLuongBacTuBac;
+        window.formatCurrency = formatCurrency;
+        window.showLoading = showLoading;
+        window.hideLoading = hideLoading;
+        window.incrementValue = incrementValue;
+        window.decrementValue = decrementValue;
+        // Now, let's check the event listener for btnTaoChiTiet
+        document.addEventListener('DOMContentLoaded', function () {
+            // Make sure the btnTaoChiTiet is properly obtained
+            const btnTaoChiTiet = document.getElementById('btnTaoChiTiet');
+
+            if (btnTaoChiTiet) {
+                // Re-attach the event listener
+                btnTaoChiTiet.addEventListener('click', function () {
+                    console.log("Tạo chi tiết button clicked");
+                    const selectedNhomNgach = document.getElementById('nhomNgach').value;
+
+                    if (selectedNhomNgach) {
+                        showLoading('Đang tạo bảng chi tiết...');
+                        setTimeout(() => {
+                            try {
+                                createChiTietTable(selectedNhomNgach);
+                                hideLoading();
+
+                                // Hiệu ứng scroll mượt đến phần chi tiết
+                                setTimeout(() => {
+                                    chiTietSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }, 200);
+                            } catch (error) {
+                                console.error("Error in createChiTietTable:", error);
+                                hideLoading();
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi khi tạo chi tiết',
+                                    text: 'Đã xảy ra lỗi khi tạo bảng chi tiết: ' + error.message,
+                                    confirmButtonColor: '#0ea5e9'
+                                });
+                            }
+                        }, 500); // Thêm timeout nhỏ để hiện loading
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Chưa chọn nhóm ngạch',
+                            text: 'Vui lòng chọn nhóm ngạch trước khi tạo chi tiết!',
+                            confirmButtonColor: '#0ea5e9'
+                        });
+                    }
+                });
+            } else {
+                console.error("Button with ID 'btnTaoChiTiet' not found!");
+            }
+        });
+        // Khởi tạo dữ liệu khi trang được tải
+        // Add an option to manage drafts in the DOMContentLoaded event handler
+        // Add a manage drafts button to the UI
+        // Tải dữ liệu CaiDatNL và đặt giá trị mặc định khi trang được tải
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                // Hiển thị loading ban đầu
+                showLoading('Đang khởi tạo hệ thống...');
+
+                // Tải dữ liệu cần thiết
+                await loadCaiDatNL();
+                await loadCaiDatChucDanh();
+                setDefaultValues();
+
+                // Set up auto-save functionality
+                setupAutoSave();
+
+                // Check if there are any drafts available
+                loadDraftsFromStorage();
+                if (drafts.length > 0) {
+                    // Ask if the user wants to load the most recent draft
+                    Swal.fire({
+                        title: 'Bản nháp sẵn có',
+                        text: 'Bạn có muốn tải bản nháp gần đây nhất không?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Có, tải lên',
+                        cancelButtonText: 'Không, bắt đầu mới'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            loadDraft(drafts[0].id);
+                        }
+                    });
+                }
+
+                // Add a manage drafts button to the UI - using the correct selector for your updated design
+                const headerElement = document.querySelector('h1.text-3xl');
+
+                if (headerElement) {
+                    const manageDraftsBtn = document.createElement('button');
+                    manageDraftsBtn.className = 'ml-4 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center';
+                    manageDraftsBtn.innerHTML = '<i class="fas fa-cog mr-2"></i> Quản lý bản nháp';
+                    manageDraftsBtn.addEventListener('click', manageDrafts);
+
+                    // Find the header container
+                    const headerContainer = document.querySelector('header .flex:first-child');
+                    if (headerContainer) {
+                        headerContainer.appendChild(manageDraftsBtn);
+                    } else {
+                        // Fallback if the container isn't found
+                        headerElement.insertAdjacentElement('afterend', manageDraftsBtn);
+                    }
+                } else {
+                    // If we can't find the header, add the button somewhere else
+                    const altLocation = document.querySelector('.page-container') || document.body;
+                    const manageDraftsBtn = document.createElement('button');
+                    manageDraftsBtn.className = 'fixed top-4 right-4 z-40 px-3 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200 flex items-center';
+                    manageDraftsBtn.innerHTML = '<i class="fas fa-cog mr-2"></i> Quản lý bản nháp';
+                    manageDraftsBtn.addEventListener('click', manageDrafts);
+                    altLocation.appendChild(manageDraftsBtn);
+                }
+
+                // Hide loading after all initialization is complete
+                hideLoading();
+
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                hideLoading();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi khởi tạo',
+                    text: 'Đã xảy ra lỗi khi khởi tạo hệ thống. Vui lòng thử lại sau.',
+                    confirmButtonColor: '#0ea5e9'
+                });
+            }
+        });
+
+        // Vô hiệu hóa chuột phải
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        // Vô hiệu hóa phím tắt
+        document.onkeydown = function (e) {
+            // Vô hiệu hóa F12
+            if (e.keyCode == 123) {
+                return false;
+            }
+            // Vô hiệu hóa Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            // Vô hiệu hóa Ctrl+Shift+J
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            // Vô hiệu hóa Ctrl+U
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+
+    </script>
+</body>
+
+</html>
