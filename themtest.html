@@ -1919,7 +1919,6 @@
         saveAllBtn.addEventListener('click', async function () {
             // Lấy dữ liệu từ form
             khaiBaoData = {
-                IDKB: document.getElementById('idkb').value,
                 'NGÀY KHAI BÁO': document.getElementById('ngayKhaiBao').value,
                 'HIỆU LỰC TỪ': document.getElementById('hieuLucTu').value,
                 'LƯƠNG TỐI THIỂU': parseFloat(document.getElementById('luongToiThieu').value),
@@ -1997,7 +1996,7 @@
                             "Locale": "vi-VN",
                             "Timezone": "Asia/Ho_Chi_Minh"
                         },
-                        "Rows": [khaiBaoData]
+                        "Rows": []
                     }
                 });
 
