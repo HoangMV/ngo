@@ -742,25 +742,7 @@
 
     <!-- JavaScript -->
     <script>
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
-
-        document.onkeydown = function (e) {
-            if (e.keyCode == 123) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
-
+        
         document.addEventListener('DOMContentLoaded', function () {
             // Cấu hình API AppSheet
             const appSheetConfig = {
@@ -1862,6 +1844,7 @@
                         {
                             "Action": "Add",
                             "Properties": {
+                                "Timezone": "Asia/Ho_Chi_Minh"
                             },
                             "Rows": [orderData]
                         }
@@ -1879,6 +1862,7 @@
                         {
                             "Action": "Add",
                             "Properties": {
+                                "Timezone": "Asia/Ho_Chi_Minh"
                             },
                             "Rows": preparedDetails
                         }
@@ -2117,7 +2101,7 @@
                     tableContainer.style.overflowY = 'visible';
                 }
             }
-
+            
             // Cập nhật tổng tiền của một sản phẩm
             function updateItemTotal(item) {
                 item.total = item.quantity * item.price;
@@ -2937,6 +2921,9 @@
             handleOverflowContent();
         });
 
+        
+        
+        
         const styleElement = document.createElement('style');
         styleElement.textContent = `
    @media (max-width: 768px) {
