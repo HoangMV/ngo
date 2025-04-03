@@ -91,12 +91,24 @@
         border-radius: 4px;
         border: 1px solid #e2e8f0;
     }
+
+    /* CSS để đảm bảo loading overlay hiển thị trên tất cả các phần tử khác */
+    #loadingOverlay {
+        z-index: 9999 !important;
+        /* Đặt z-index cao hơn mọi thứ */
+    }
+
+    /* CSS để modal có z-index thấp hơn loading overlay */
+    #themKhachHangModal {
+        z-index: 9000;
+        /* Thấp hơn loading overlay */
+    }
 </style>
 
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-800/70 backdrop-blur-sm z-50 flex justify-center items-center hidden transition-opacity duration-300">
+        class="fixed inset-0 bg-gray-800/70 backdrop-blur-sm z-[9999] flex justify-center items-center hidden transition-opacity duration-300">
         <div class="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center animate-pulse">
             <div class="text-blue-600 mb-4">
                 <i class="fas fa-circle-notch fa-spin text-5xl"></i>
@@ -197,6 +209,8 @@
                             <div class="mt-2 text-xs text-blue-500 cursor-pointer" id="showAllCategories">
                                 <span>Xem tất cả phân loại</span>
                             </div>
+                            <!-- Thêm dòng này -->
+                            <div id="categoryFilterStatus" class="text-xs text-gray-600 mt-2"></div>
                         </div>
                     </div>
 
@@ -517,15 +531,9 @@
                                                 class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                                 <i class="fas fa-truck text-gray-400"></i>
                                             </div>
-                                            <select id="phiShip"
-                                                class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                <option value="10000">10,000</option>
-                                                <option value="15000">15,000</option>
-                                                <option value="20000">20,000</option>
-                                                <option value="30000">30,000</option>
-                                                <option value="40000">40,000</option>
-                                                <option value="50000">50,000</option>
-                                            </select>
+                                            <input type="text" id="phiShip"
+                                                class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                                                value="0">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                                 <span class="text-gray-500 text-sm">VNĐ</span>
@@ -600,7 +608,7 @@
     </div>
 
     <!-- Modal Thêm Khách Hàng -->
-    <div id="themKhachHangModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div id="themKhachHangModal" class="fixed inset-0 z-[9000] hidden overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4">
             <!-- Overlay -->
             <div class="fixed inset-0 bg-black opacity-50 transition-opacity" id="modalOverlay"></div>
@@ -620,7 +628,7 @@
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng <span
                                         class="text-red-500">*</span></label>
-                                <input type="text" id="tenKhachHang"
+                                <input type="text" id="tenKhachHang" name="Họ tên"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required>
                             </div>
@@ -628,21 +636,22 @@
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span
                                         class="text-red-500">*</span></label>
-                                <input type="tel" id="soDienThoai"
+                                <input type="tel" id="soDienThoai" name="SĐT"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required>
                             </div>
 
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                                <input type="text" id="diaChi"
+                                <input type="text" id="diaChi" name="Địa chỉ"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
 
                             <div class="form-group">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input type="email" id="email"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                                <textarea id="ghiChu" name="Ghi chú"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    rows="3"></textarea>
                             </div>
                         </div>
 
@@ -733,6 +742,25 @@
 
     <!-- JavaScript -->
     <script>
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
             // Cấu hình API AppSheet
             const appSheetConfig = {
@@ -842,8 +870,8 @@
                                 "Locale": "vi-VN",
                                 "Timezone": "Asia/Ho_Chi_Minh",
                                 "Selector": `Filter(${appSheetConfig.tables.donHang}, 
-                       AND(MONTH([Ngày bán]) = MONTH(TODAY()), 
-                           YEAR([Ngày bán]) = YEAR(TODAY())))`
+           AND(MONTH([Ngày bán]) = MONTH(TODAY()), 
+               YEAR([Ngày bán]) = YEAR(TODAY())))`
                             }
                         }
                     });
@@ -938,8 +966,6 @@
             document.getElementById('btnTaiMauNhap').addEventListener('click', downloadImportTemplate);
             document.getElementById('btnNhapDuLieu').addEventListener('click', importDataFromExcel);
 
-            // Thêm các hàm JavaScript sau vào phần script
-            // =======================================
             // Thiết lập quét barcode
             function setupBarcodeScanner() {
                 // Biến lưu trữ kết quả quét
@@ -1076,7 +1102,6 @@
                     });
                 }
             }
-            // =======================================
 
             // Kiểm tra kết nối API
             async function testAppSheetConnection() {
@@ -1145,6 +1170,8 @@
                         }
                     });
 
+                    console.log('Phản hồi API khách hàng:', response);
+
                     if (response.data && response.data.Rows) {
                         khachHangList = response.data.Rows;
                     } else if (Array.isArray(response.data)) {
@@ -1154,61 +1181,204 @@
                         khachHangList = [];
                     }
 
-                    // Thay đổi select box thành input với datalist
-                    const khachHangContainer = document.querySelector('#khachHang').parentElement;
+                    console.log('Danh sách khách hàng đã tải:', khachHangList);
+
+                    // Cập nhật HTML thành dạng có nút tìm kiếm
+                    const khachHangContainer = document.querySelector('#khachHang').parentElement.parentElement;
                     khachHangContainer.innerHTML = `
-    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <i class="fas fa-user text-gray-400"></i>
-    </div>
-    <input type="text" id="khachHangSearch" list="khachHangList"
-        class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Nhập tên khách hàng để tìm..." required>
+<div class="relative flex-1">
+    <input type="text" id="companyName" 
+        class="w-full px-3 py-2.5 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Tên khách hàng" readonly>
+    <button id="searchCompany" type="button" class="absolute right-0 top-0 h-full bg-blue-500 text-white px-3 py-2.5 rounded-r-lg">
+        <i class="fas fa-search"></i>
+    </button>
     <input type="hidden" id="khachHang" name="khachHang" required>
-    <datalist id="khachHangList"></datalist>
+</div>
+<button type="button" id="btnThemKhachHang"
+    class="px-3 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+    <i class="fas fa-plus"></i>
+</button>
 `;
 
-                    // Điền danh sách khách hàng vào datalist
-                    // Điền danh sách khách hàng vào datalist
-                    const khachHangDatalist = document.getElementById('khachHangList');
-                    const khachHangMap = {}; // Đối tượng ánh xạ tên -> id
-
-                    khachHangList.forEach(khachHang => {
-                        const id = khachHang['idkh'] || khachHang.ID;
-                        const ten = khachHang['Họ tên'] || khachHang.Ten || '';
-                        const sdt = khachHang['SĐT'] || khachHang.SDT || '';
-                        const displayText = `${ten}${sdt ? ` - ${sdt}` : ''}`;
-
-                        const option = document.createElement('option');
-                        option.value = displayText;
-                        option.dataset.id = id;
-                        khachHangDatalist.appendChild(option);
-
-                        // Lưu vào map để tìm kiếm ngược lại khi người dùng chọn
-                        khachHangMap[displayText] = id;
+                    // Thêm sự kiện cho nút tìm kiếm sau khi đã tạo trong DOM
+                    document.getElementById('searchCompany').addEventListener('click', function () {
+                        showCustomerSearchModal();
                     });
 
-                    // Thêm sự kiện khi người dùng chọn khách hàng
-                    const khachHangSearch = document.getElementById('khachHangSearch');
-                    const khachHangHidden = document.getElementById('khachHang');
+                    // After you create the button in loadKhachHangList function:
+                    const themKhachHangBtn = document.getElementById('btnThemKhachHang');
+                    if (themKhachHangBtn) {
+                        // Remove any existing listeners by cloning and replacing
+                        const newBtn = themKhachHangBtn.cloneNode(true);
+                        themKhachHangBtn.parentNode.replaceChild(newBtn, themKhachHangBtn);
 
-                    khachHangSearch.addEventListener('input', function () {
-                        const selectedValue = this.value;
-                        const khachHangId = khachHangMap[selectedValue];
-
-                        if (khachHangId) {
-                            khachHangHidden.value = khachHangId;
-                        } else {
-                            khachHangHidden.value = '';
-                        }
-                    });
+                        // Add new event listener
+                        newBtn.addEventListener('click', function () {
+                            openKhachHangModal();
+                        });
+                    }
 
                     hideLoading();
                 } catch (error) {
                     console.error('Lỗi khi tải danh sách khách hàng:', error);
+                    console.log('Chi tiết lỗi:', error.response ? error.response.data : error.message);
                     hideLoading();
                     showAlert('error', 'Lỗi kết nối', 'Không thể tải danh sách khách hàng. Vui lòng thử lại sau.');
                 }
             }
+
+            // Hàm hiển thị modal tìm kiếm khách hàng
+            function showCustomerSearchModal() {
+                // First check if a modal already exists and remove it
+                const existingModal = document.getElementById('customerSearchModal');
+                if (existingModal) {
+                    document.body.removeChild(existingModal);
+                }
+
+                // Create modal
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+                modalOverlay.id = 'customerSearchModal';
+
+                const modalContent = document.createElement('div');
+                modalContent.className = 'bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col';
+
+                modalContent.innerHTML = `
+<div class="p-4 border-b border-gray-200 flex justify-between items-center">
+    <h3 class="text-lg font-semibold text-gray-700">Tìm kiếm khách hàng</h3>
+    <button id="closeCustomerModal" class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+<div class="p-4 border-b border-gray-200">
+    <div class="mb-2">
+        <input type="text" id="customerSearchInput" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Tìm kiếm theo tên, SĐT...">
+    </div>
+</div>
+<div class="overflow-y-auto flex-grow">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50 sticky top-0">
+            <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tên khách hàng
+                </th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SĐT
+                </th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Địa chỉ
+                </th>
+                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Chọn
+                </th>
+            </tr>
+        </thead>
+        <tbody id="customerSearchResults" class="bg-white divide-y divide-gray-200">
+            <!-- Kết quả tìm kiếm sẽ được thêm vào đây -->
+        </tbody>
+    </table>
+</div>
+`;
+
+                modalOverlay.appendChild(modalContent);
+                document.body.appendChild(modalOverlay);
+
+                // Xử lý đóng modal
+                document.getElementById('closeCustomerModal').addEventListener('click', function () {
+                    document.body.removeChild(modalOverlay);
+                });
+
+                // Hiển thị tất cả khách hàng khi mở modal
+                displayAllCustomers();
+
+                // Xử lý tìm kiếm khi gõ
+                document.getElementById('customerSearchInput').addEventListener('input', function () {
+                    const searchTerm = this.value.toLowerCase();
+
+                    if (searchTerm.length === 0) {
+                        displayAllCustomers();
+                        return;
+                    }
+
+                    const filteredCustomers = khachHangList.filter(customer =>
+                        (customer['Họ tên'] && customer['Họ tên'].toLowerCase().includes(searchTerm)) ||
+                        (customer['SĐT'] && customer['SĐT'].toLowerCase().includes(searchTerm)) ||
+                        (customer['Địa chỉ'] && customer['Địa chỉ'].toLowerCase().includes(searchTerm))
+                    );
+
+                    renderCustomerResults(filteredCustomers);
+                });
+
+                // Focus vào input tìm kiếm
+                document.getElementById('customerSearchInput').focus();
+            }
+
+            // Hàm hiển thị tất cả khách hàng
+            function displayAllCustomers() {
+                renderCustomerResults(khachHangList);
+            }
+
+            // Hàm render kết quả tìm kiếm khách hàng
+            function renderCustomerResults(customers) {
+                const results = document.getElementById('customerSearchResults');
+                results.innerHTML = '';
+
+                if (customers.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+    <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+        Không tìm thấy khách hàng phù hợp.
+    </td>
+`;
+                    results.appendChild(row);
+                    return;
+                }
+
+                customers.forEach(customer => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+
+                    // Đảm bảo ID được lấy chính xác
+                    const customerId = customer['idkh'] || customer.ID;
+
+                    row.innerHTML = `
+    <td class="px-4 py-3 text-sm text-gray-900">${customer['Họ tên'] || ''}</td>
+    <td class="px-4 py-3 text-sm text-gray-500">${customer['SĐT'] || ''}</td>
+    <td class="px-4 py-3 text-sm text-gray-500">${customer['Địa chỉ'] || ''}</td>
+    <td class="px-4 py-3 text-sm font-medium text-center">
+        <button class="select-customer-btn text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50" data-id="${customerId}">Chọn</button>
+    </td>
+`;
+
+                    results.appendChild(row);
+                });
+
+                // Thêm sự kiện chọn khách hàng
+                document.querySelectorAll('.select-customer-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const customerId = this.getAttribute('data-id');
+                        console.log('Chọn khách hàng ID:', customerId);
+                        selectCustomer(customerId);
+                        document.body.removeChild(document.getElementById('customerSearchModal'));
+                    });
+                });
+            }
+
+            // Hàm chọn khách hàng và điền thông tin
+            function selectCustomer(customerId) {
+                const customer = khachHangList.find(c => c['idkh'] === customerId || c.ID === customerId);
+                if (customer) {
+                    console.log('Chọn khách hàng:', customer);
+                    document.getElementById('khachHang').value = customer['idkh'] || customer.ID;
+                    document.getElementById('companyName').value = customer['Họ tên'] || customer.Ten || '';
+                } else {
+                    console.log('Không tìm thấy khách hàng với ID:', customerId);
+                }
+            }
+
 
             // Tải danh sách nhân viên
             async function loadNhanVienList() {
@@ -1329,33 +1499,33 @@
 
                     // Thêm loading indicator trước khi tải ảnh
                     const imageHtml = `
-                       <div class="w-10 h-10 flex-shrink-0">
-                           <div id="loading-product-${product['ID'] || product.ID}" class="image-loading">...</div>
-                           <img src="${getImageUrl(product)}" alt="${product['Tên sản phẩm'] || product.Ten}" 
-                                id="product-img-${product['ID'] || product.ID}"
-                                class="w-10 h-10 object-cover rounded-md border border-gray-200"
-                                style="display:none;"
-                                onload="this.style.display='block'; document.getElementById('loading-product-${product['ID'] || product.ID}').style.display='none';"
-                                onerror="handleImageError(this)">
-                       </div>
-                   `;
+               <div class="w-10 h-10 flex-shrink-0">
+                   <div id="loading-product-${product['ID'] || product.ID}" class="image-loading">...</div>
+                   <img src="${getImageUrl(product)}" alt="${product['Tên sản phẩm'] || product.Ten}" 
+                        id="product-img-${product['ID'] || product.ID}"
+                        class="w-10 h-10 object-cover rounded-md border border-gray-200"
+                        style="display:none;"
+                        onload="this.style.display='block'; document.getElementById('loading-product-${product['ID'] || product.ID}').style.display='none';"
+                        onerror="handleImageError(this)">
+               </div>
+           `;
 
                     const listItem = document.createElement('li');
                     listItem.className = 'py-3 flex justify-between items-center hover:bg-gray-50 px-2 rounded-lg cursor-pointer product-item';
                     listItem.dataset.id = product['ID'] || product.ID;
                     listItem.dataset.category = category;
                     listItem.innerHTML = `
-                       <div class="flex items-center space-x-3">
-                           ${imageHtml}
-                           <div>
-                               <h4 class="font-medium text-gray-800">${product['Tên sản phẩm'] || product.Ten}</h4>
-                           </div>
-                       </div>
-                       <div class="text-right">
-                           <div class="font-medium text-gray-900">${formatCurrency(product['Giá lẻ'] || product.GiaBan)}</div>
-                           <div class="text-xs text-gray-500">${product['Đvt'] || product.DonViTinh}</div>
-                       </div>
-                   `;
+               <div class="flex items-center space-x-3">
+                   ${imageHtml}
+                   <div>
+                       <h4 class="font-medium text-gray-800">${product['Tên sản phẩm'] || product.Ten}</h4>
+                   </div>
+               </div>
+               <div class="text-right">
+                   <div class="font-medium text-gray-900">${formatCurrency(product['Giá lẻ'] || product.GiaBan)}</div>
+                   <div class="text-xs text-gray-500">${product['Đvt'] || product.DonViTinh}</div>
+               </div>
+           `;
                     productList.appendChild(listItem);
 
                     // Thêm sự kiện click để thêm sản phẩm vào đơn hàng
@@ -1385,55 +1555,13 @@
                     const button = document.createElement('button');
                     button.className = 'px-3 py-1 rounded bg-gray-200 text-gray-700 font-medium category-filter';
                     button.dataset.category = category;
-                    button.dataset.selected = 'false'; // Thêm thuộc tính để theo dõi trạng thái chọn
+                    button.dataset.selected = 'false';
                     button.textContent = category;
                     categoryContainer.appendChild(button);
-
-                    // Thêm sự kiện lọc sản phẩm theo phân loại
-                    button.addEventListener('click', function () {
-                        // Chuyển đổi trạng thái chọn
-                        const isSelected = this.dataset.selected === 'true';
-                        this.dataset.selected = isSelected ? 'false' : 'true';
-
-                        // Chuyển đổi giao diện
-                        if (isSelected) {
-                            this.classList.remove('bg-blue-500', 'text-white');
-                            this.classList.add('bg-gray-200', 'text-gray-700');
-                        } else {
-                            this.classList.remove('bg-gray-200', 'text-gray-700');
-                            this.classList.add('bg-blue-500', 'text-white');
-
-                            // Cập nhật trạng thái nút "Tất cả" khi chọn danh mục khác
-                            const allButton = document.querySelector('.category-filter[data-category="all"]');
-                            if (allButton) {
-                                allButton.dataset.selected = 'false';
-                                allButton.classList.remove('bg-blue-500', 'text-white');
-                                allButton.classList.add('bg-gray-200', 'text-gray-700');
-                            }
-                        }
-
-                        // Lọc lại các sản phẩm
-                        filterProductsBySelectedCategories();
-                    });
                 });
 
-                // Đặt lại sự kiện cho nút "Tất cả"
-                document.querySelector('.category-filter[data-category="all"]').addEventListener('click', function () {
-                    // Reset trạng thái của tất cả các nút khác
-                    document.querySelectorAll('.category-filter:not([data-category="all"])').forEach(btn => {
-                        btn.dataset.selected = 'false';
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('bg-gray-200', 'text-gray-700');
-                    });
-
-                    // Chọn nút "Tất cả"
-                    this.dataset.selected = 'true';
-                    this.classList.remove('bg-gray-200', 'text-gray-700');
-                    this.classList.add('bg-blue-500', 'text-white');
-
-                    // Hiển thị tất cả sản phẩm
-                    filterProductsByCategory('all');
-                });
+                // Thiết lập sự kiện cho các nút phân loại
+                setupCategoryFilters();
 
                 // Thêm sự kiện cho nút "Xem tất cả phân loại"
                 document.getElementById('showAllCategories').addEventListener('click', function () {
@@ -1455,40 +1583,109 @@
                 });
             }
 
-            // Hàm lọc sản phẩm theo nhiều danh mục đã chọn
-            function filterProductsBySelectedCategories() {
+            // Thiết lập sự kiện cho các nút phân loại
+            function setupCategoryFilters() {
+                document.querySelectorAll('.category-filter').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const isAll = this.dataset.category === 'all';
+
+                        if (isAll) {
+                            // Bỏ chọn tất cả các nút khác
+                            document.querySelectorAll('.category-filter:not([data-category="all"])').forEach(btn => {
+                                btn.dataset.selected = 'false';
+                                btn.classList.remove('bg-blue-500', 'text-white');
+                                btn.classList.add('bg-gray-200', 'text-gray-700');
+                            });
+
+                            // Chọn nút "Tất cả"
+                            this.dataset.selected = 'true';
+                            this.classList.remove('bg-gray-200', 'text-gray-700');
+                            this.classList.add('bg-blue-500', 'text-white');
+                        } else {
+                            // Bỏ chọn nút "Tất cả"
+                            const allButton = document.querySelector('.category-filter[data-category="all"]');
+                            if (allButton) {
+                                allButton.dataset.selected = 'false';
+                                allButton.classList.remove('bg-blue-500', 'text-white');
+                                allButton.classList.add('bg-gray-200', 'text-gray-700');
+                            }
+
+                            // Chuyển đổi trạng thái chọn của nút hiện tại
+                            const isSelected = this.dataset.selected === 'true';
+                            this.dataset.selected = isSelected ? 'false' : 'true';
+
+                            // Cập nhật giao diện của nút
+                            if (isSelected) {
+                                this.classList.remove('bg-blue-500', 'text-white');
+                                this.classList.add('bg-gray-200', 'text-gray-700');
+                            } else {
+                                this.classList.remove('bg-gray-200', 'text-gray-700');
+                                this.classList.add('bg-blue-500', 'text-white');
+                            }
+                        }
+
+                        // Lọc sản phẩm kết hợp tìm kiếm và phân loại
+                        filterProducts();
+                    });
+                });
+            }
+
+            // Hàm lọc sản phẩm kết hợp tìm kiếm và phân loại
+            function filterProducts() {
+                // Lấy chuỗi tìm kiếm hiện tại
+                const searchTerm = document.getElementById('productSearch').value.toLowerCase().trim();
+
+                // Lấy danh sách các danh mục đã chọn
                 const selectedCategories = Array.from(
                     document.querySelectorAll('.category-filter[data-selected="true"]:not([data-category="all"])')
                 ).map(btn => btn.dataset.category);
 
-                // Nếu không có danh mục nào được chọn hoặc nút "Tất cả" đang được chọn, hiển thị tất cả
-                if (selectedCategories.length === 0 ||
-                    document.querySelector('.category-filter[data-category="all"][data-selected="true"]')) {
-                    filterProductsByCategory('all');
-                    return;
-                }
+                // Kiểm tra nếu đang chọn "Tất cả"
+                const isAllSelected = document.querySelector('.category-filter[data-category="all"][data-selected="true"]') !== null;
 
-                // Lọc các sản phẩm theo các danh mục đã chọn
+                // Lọc qua tất cả các sản phẩm
                 const productItems = document.querySelectorAll('.product-item');
+                let visibleCount = 0;
+
                 productItems.forEach(item => {
-                    if (selectedCategories.includes(item.dataset.category)) {
+                    const productName = item.querySelector('h4').textContent.toLowerCase();
+                    const productCategory = item.dataset.category;
+
+                    // Đáp ứng điều kiện tìm kiếm
+                    const matchesSearch = searchTerm === '' || productName.includes(searchTerm);
+
+                    // Đáp ứng điều kiện phân loại
+                    const matchesCategory = isAllSelected ||
+                        (selectedCategories.length === 0) ||
+                        selectedCategories.includes(productCategory);
+
+                    // Chỉ hiển thị sản phẩm nếu thỏa mãn cả hai điều kiện
+                    if (matchesSearch && matchesCategory) {
                         item.classList.remove('hidden');
+                        visibleCount++;
                     } else {
                         item.classList.add('hidden');
                     }
                 });
+
+                // Cập nhật thông tin trạng thái lọc
+                updateFilterStatusText(selectedCategories, searchTerm, visibleCount, productItems.length);
             }
 
-            // Lọc sản phẩm theo danh mục
-            function filterProductsByCategory(category) {
-                const productItems = document.querySelectorAll('.product-item');
-                productItems.forEach(item => {
-                    if (category === 'all' || item.dataset.category === category) {
-                        item.classList.remove('hidden');
-                    } else {
-                        item.classList.add('hidden');
-                    }
-                });
+            // Cập nhật text hiển thị trạng thái lọc sản phẩm
+            function updateFilterStatusText(selectedCategories, searchTerm, visibleCount, totalCount) {
+                const statusElement = document.getElementById('categoryFilterStatus');
+                if (!statusElement) return;
+
+                if (searchTerm && selectedCategories.length > 0) {
+                    statusElement.textContent = `Đang hiển thị ${visibleCount}/${totalCount} sản phẩm theo từ khóa "${searchTerm}" và ${selectedCategories.length} danh mục`;
+                } else if (searchTerm) {
+                    statusElement.textContent = `Đang hiển thị ${visibleCount}/${totalCount} sản phẩm theo từ khóa "${searchTerm}"`;
+                } else if (selectedCategories.length > 0) {
+                    statusElement.textContent = `Đang hiển thị ${visibleCount}/${totalCount} sản phẩm thuộc ${selectedCategories.length} danh mục`;
+                } else {
+                    statusElement.textContent = `Hiển thị tất cả ${visibleCount} sản phẩm`;
+                }
             }
 
             // Tìm thông tin sản phẩm theo SKU
@@ -1535,12 +1732,23 @@
                 }
             }
 
-
-
             // Thêm khách hàng mới
             async function addNewCustomer(customerData) {
                 try {
-                    showLoading('Đang thêm khách hàng mới...');
+                    // Đảm bảo dữ liệu đầy đủ cho khách hàng mới
+                    const currentTime = new Date().getTime();
+                    const newId = `KH${currentTime}`;
+
+                    // Bao gồm tất cả các trường trong bảng
+                    const newCustomerData = {
+                        'idkh': newId,
+                        'Họ tên': customerData['Họ tên'],
+                        'SĐT': customerData['SĐT'],
+                        'Địa chỉ': customerData['Địa chỉ'] || '',
+                        'Ghi chú': customerData['Ghi chú'] || ''
+                    };
+
+                    console.log('Dữ liệu khách hàng gửi đi:', newCustomerData);
 
                     const response = await axios({
                         method: 'POST',
@@ -1555,77 +1763,129 @@
                                 "Locale": "vi-VN",
                                 "Timezone": "Asia/Ho_Chi_Minh"
                             },
-                            "Rows": [customerData]
+                            "Rows": [newCustomerData]
                         }
                     });
 
-                    hideLoading();
+                    console.log('Phản hồi API thêm khách hàng:', response);
 
                     if (response.status === 200) {
-                        return response.data;
+                        // Kiểm tra nếu có lỗi trong phản hồi
+                        if (response.data && (response.data.success === false || response.data.error)) {
+                            throw new Error(`Lỗi từ API: ${response.data.error || 'Không xác định'}`);
+                        }
+
+                        // Thêm khách hàng mới vào danh sách để dùng ngay
+                        khachHangList.push(newCustomerData);
+
+                        // Chọn khách hàng vừa thêm
+                        document.getElementById('khachHang').value = newCustomerData.idkh;
+                        document.getElementById('companyName').value = newCustomerData['Họ tên'] || '';
+
+                        hideLoading(); // Ẩn loading khi hoàn thành
+                        return newCustomerData;
                     } else {
-                        throw new Error("Thêm khách hàng không thành công");
+                        throw new Error(`Thêm khách hàng không thành công, mã lỗi: ${response.status}`);
                     }
                 } catch (error) {
                     console.error('Lỗi khi thêm khách hàng:', error);
-                    hideLoading();
+                    console.log('Chi tiết lỗi:', error.response ? error.response.data : error.message);
+                    // Không cần ẩn loading ở đây, sẽ ẩn trong hàm gọi
                     throw error;
                 }
             }
 
-            // Lưu đơn hàng
+            // Xử lý thêm khách hàng mới
+            async function handleThemKhachHang(event) {
+                event.preventDefault();
+
+                try {
+                    // Hiển thị loading ngay lập tức khi nhấn Lưu
+                    showLoading('Đang thêm khách hàng mới...');
+
+                    // Lấy tất cả dữ liệu từ form
+                    const form = document.getElementById('khachHangForm');
+                    const formData = new FormData(form);
+                    const customerData = {};
+
+                    // Chuyển FormData thành object
+                    for (const [key, value] of formData.entries()) {
+                        customerData[key] = value;
+                    }
+
+                    // Kiểm tra dữ liệu bắt buộc
+                    if (!customerData['Họ tên'] || !customerData['SĐT']) {
+                        hideLoading(); // Ẩn loading nếu thiếu thông tin
+                        showAlert('warning', 'Thiếu thông tin', 'Vui lòng nhập tên và số điện thoại khách hàng');
+                        return;
+                    }
+
+                    // Gọi API thêm khách hàng - không cần hiển thị loading trong hàm này nữa
+                    // vì đã hiển thị trước đó
+                    const result = await addNewCustomer(customerData);
+
+                    // Đóng modal
+                    closeKhachHangModal();
+
+                    // Thông báo thành công
+                    showAlert('success', 'Thành công', 'Đã thêm khách hàng mới thành công');
+
+                } catch (error) {
+                    console.error('Lỗi khi thêm khách hàng:', error);
+                    // Ẩn loading phải được gọi ở đây trong trường hợp có lỗi
+                    hideLoading();
+                    showAlert('error', 'Lỗi', 'Đã xảy ra lỗi khi thêm khách hàng mới: ' + (error.message || 'Không xác định'));
+                }
+            }
+
+            // Lưu đơn hàng - phiên bản tối ưu hóa
             async function saveOrder(orderData, detailsData) {
                 try {
                     showLoading('Đang lưu đơn hàng...');
+                    const maDonHang = document.getElementById('maDonHang').value;
 
-                    // Gửi đồng thời cả hai yêu cầu
-                    const [orderResponse] = await Promise.all([
-                        axios({
-                            method: 'POST',
-                            url: `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.donHang}/Action`,
-                            headers: {
-                                'ApplicationAccessKey': appSheetConfig.accessKey,
-                                'Content-Type': 'application/json'
-                            },
-                            data: {
-                                "Action": "Add",
-                                "Properties": {
-                                    "Locale": "vi-VN",
-                                    "Timezone": "Asia/Ho_Chi_Minh"
-                                },
-                                "Rows": [orderData]
-                            }
-                        })
-                    ]);
-
-                    const orderId = orderResponse.data.Rows[0].idban;
-
-                    // Sau khi có ID đơn hàng, gửi chi tiết đơn hàng
-                    const detailsResponse = await axios({
-                        method: 'POST',
-                        url: `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.chiTietDonHang}/Action`,
+                    // Tạo instance axios để tái sử dụng
+                    const apiClient = axios.create({
                         headers: {
                             'ApplicationAccessKey': appSheetConfig.accessKey,
                             'Content-Type': 'application/json'
                         },
-                        data: {
-                            "Action": "Add",
-                            "Properties": {
-                                "Locale": "vi-VN",
-                                "Timezone": "Asia/Ho_Chi_Minh"
-                            },
-                            "Rows": detailsData.map(item => ({
-                                ...item,
-                                'idban': orderId
-                            }))
-                        }
+                        timeout: 30000 // Timeout 30 giây
                     });
 
+                    // Thêm thông tin idban vào orderData để đảm bảo đồng bộ
+                    orderData.idban = maDonHang;
+
+                    // Gửi đơn hàng
+                    await apiClient.post(
+                        `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.donHang}/Action`,
+                        {
+                            "Action": "Add",
+                            "Properties": {
+                            },
+                            "Rows": [orderData]
+                        }
+                    );
+
+                    // Chuẩn bị dữ liệu chi tiết trước khi gửi đơn hàng để giảm độ trễ
+                    const preparedDetails = detailsData.map(item => ({
+                        ...item,
+                        'idban': maDonHang
+                    }));
+
+                    // Gửi chi tiết đơn hàng ngay sau khi đơn hàng được lưu
+                    await apiClient.post(
+                        `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.chiTietDonHang}/Action`,
+                        {
+                            "Action": "Add",
+                            "Properties": {
+                            },
+                            "Rows": preparedDetails
+                        }
+                    );
+
                     hideLoading();
-                    return {
-                        order: orderResponse.data,
-                        details: detailsResponse.data
-                    };
+                    return { success: true, maDonHang };
                 } catch (error) {
                     console.error('Lỗi khi lưu đơn hàng:', error);
                     hideLoading();
@@ -1690,6 +1950,11 @@
 
                 // Hiển thị phần chi tiết nếu ẩn
                 document.getElementById('chiTietSection').classList.remove('hidden');
+
+                // Cuộn đến phần chi tiết nếu đây là sản phẩm đầu tiên được thêm
+                if (orderItems.length === 1) {
+                    document.getElementById('chiTietSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
 
             function renderOrderItems() {
@@ -1725,16 +1990,20 @@
                     <button class="quantity-increase px-2 py-1 bg-gray-200 rounded-r-lg">+</button>
                 </div>
             </td>
-            <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(item.price)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">
+                <input type="text" class="price-input w-24 text-right border border-gray-300 rounded px-2 py-1" 
+                    value="${formatCurrency(item.price, false)}">
+            </td>
             <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(item.total)}</td>
             <td class="px-3 py-2 whitespace-nowrap">
                 <select class="price-type border border-gray-300 rounded px-2 py-1 text-sm">
                     <option value="Giá lẻ" ${item.priceType === 'Giá lẻ' ? 'selected' : ''}>Giá lẻ</option>
                     <option value="Giá sỉ" ${item.priceType === 'Giá sỉ' ? 'selected' : ''}>Giá sỉ</option>
+                    <option value="Khác" ${item.priceType === 'Khác' ? 'selected' : ''}>Khác</option>
                 </select>
             </td>
             <td class="px-3 py-2">
-                <input type="text" class="item-note border border-gray-300 rounded px-2 py-1 w-full text-sm" value="${item.note}">
+                <input type="text" class="item-note border border-gray-300 rounded px-2 py-1 w-32 text-sm" value="${item.note}">
             </td>
             <td class="px-3 py-2 whitespace-nowrap text-center">
                 <button class="delete-item text-red-500 hover:text-red-700" data-index="${index}">
@@ -1751,6 +2020,17 @@
                     const deleteBtn = row.querySelector('.delete-item');
                     const priceTypeSelect = row.querySelector('.price-type');
                     const noteInput = row.querySelector('.item-note');
+                    const priceInput = row.querySelector('.price-input'); // Thêm reference tới input đơn giá
+
+                    // Event listener cho input đơn giá
+                    priceInput.addEventListener('change', function () {
+                        const newPrice = parseCurrency(this.value);
+                        item.price = newPrice;
+                        this.value = formatCurrency(newPrice, false);
+                        updateItemTotal(item);
+                        row.cells[6].textContent = formatCurrency(item.total);
+                        updateTotals();
+                    });
 
                     decreaseBtn.addEventListener('click', function () {
                         if (item.quantity > 1) {
@@ -1810,8 +2090,10 @@
                             }
                         }
 
+                        // Cập nhật hiển thị đơn giá (trong input)
+                        priceInput.value = formatCurrency(item.price, false);
+
                         updateItemTotal(item);
-                        row.cells[5].textContent = formatCurrency(item.price); // Cập nhật hiển thị đơn giá
                         row.cells[6].textContent = formatCurrency(item.total); // Cập nhật hiển thị thành tiền
                         updateTotals();
                     });
@@ -1824,6 +2106,16 @@
                 // Update data status text
                 const dataStatusText = document.getElementById('dataStatusText');
                 dataStatusText.textContent = `Tổng số ${orderItems.length} sản phẩm`;
+
+                // Điều chỉnh chiều cao bảng chi tiết nếu có nhiều sản phẩm
+                const tableContainer = document.querySelector('#chiTietTable').parentElement;
+                if (orderItems.length > 5) {
+                    tableContainer.style.maxHeight = '400px';
+                    tableContainer.style.overflowY = 'auto';
+                } else {
+                    tableContainer.style.maxHeight = 'none';
+                    tableContainer.style.overflowY = 'visible';
+                }
             }
 
             // Cập nhật tổng tiền của một sản phẩm
@@ -1914,7 +2206,7 @@
                         'Còn phải thanh toán': conlaiPhaithanhtoan,
                         'Đã thanh toán': daThanhToan,
                         'Phí ship': phiShip,
-                        // 'Giảm giá': giamGia,
+                        'Giảm giá': giamGia,
                         'Phương thức thanh toán': phuongThucThanhToan
                     };
 
@@ -1922,6 +2214,8 @@
                     const detailsData = orderItems.map((item, index) => ({
                         'SKU': item.sku,
                         'Số lượng': item.quantity,
+                        'Đơn giá': parseCurrency(item.price),
+                        'Thành tiền': item.total,
                         'Phân loại giá': item.priceType,
                         'Ghi Chú': item.note
 
@@ -1946,7 +2240,7 @@
                 document.getElementById('donHangForm').reset();
 
                 // Reset thông tin khách hàng đã chọn
-                document.getElementById('khachHangSearch').value = '';
+                document.getElementById('companyName').value = '';
                 document.getElementById('khachHang').value = '';
 
                 // Tạo mã đơn hàng mới
@@ -1963,7 +2257,7 @@
                 document.getElementById('giamGiaTheoPhanTram').value = '0';
                 document.getElementById('phanLoaiGiamGia').value = 'Không giảm giá';
                 document.getElementById('daThanhToan').value = '0';
-                document.getElementById('phiShip').value = '10000';
+                document.getElementById('phiShip').value = '0';
                 document.getElementById('trangThai').value = 'Chốt order';
                 document.getElementById('phuongThucThanhToan').value = 'ĐÃ THANH TOÁN';
 
@@ -1974,61 +2268,26 @@
 
                 // Ẩn phần chi tiết
                 document.getElementById('chiTietSection').classList.add('hidden');
-            }
 
-            // Xử lý thêm khách hàng mới
-            async function handleThemKhachHang(event) {
-                event.preventDefault();
-
-                try {
-                    const customerData = {
-                        'Họ tên': document.getElementById('tenKhachHang').value,
-                        'SĐT': document.getElementById('soDienThoai').value,
-                        'Địa chỉ': document.getElementById('diaChi').value,
-                        'Email': document.getElementById('email').value,
-                    };
-
-                    const result = await addNewCustomer(customerData);
-
-                    // Đóng modal
-                    closeKhachHangModal();
-
-                    // Thêm khách hàng mới vào dropdown và chọn nó
-                    await loadKhachHangList();
-
-                    showAlert('success', 'Thành công', 'Đã thêm khách hàng mới thành công');
-                } catch (error) {
-                    console.error('Lỗi khi thêm khách hàng:', error);
-                    showAlert('error', 'Lỗi', 'Đã xảy ra lỗi khi thêm khách hàng mới. Vui lòng thử lại sau.');
-                }
+                // Cuộn về đầu trang
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             // Mở modal thêm khách hàng
             function openKhachHangModal() {
+                // Reset form trước khi mở modal
+                document.getElementById('khachHangForm').reset();
                 document.getElementById('themKhachHangModal').classList.remove('hidden');
             }
 
             // Đóng modal thêm khách hàng
             function closeKhachHangModal() {
                 document.getElementById('themKhachHangModal').classList.add('hidden');
-                document.getElementById('khachHangForm').reset();
             }
 
             // Sự kiện tìm kiếm sản phẩm
             document.getElementById('productSearch').addEventListener('input', function (e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const productItems = document.querySelectorAll('.product-item');
-
-                productItems.forEach(item => {
-                    const productName = item.querySelector('h4').textContent.toLowerCase();
-                    const productSku = item.querySelector('.text-sm').textContent.toLowerCase();
-
-                    if (productName.includes(searchTerm) || productSku.includes(searchTerm)) {
-                        item.classList.remove('hidden');
-                    } else {
-                        item.classList.add('hidden');
-                    }
-                });
+                filterProducts();
             });
 
             // Update discount fields based on discount type
@@ -2325,7 +2584,6 @@
             }
 
             // Cải tiến nhập dữ liệu từ Excel - tập trung vào SKU
-            // Cải tiến nhập dữ liệu từ Excel - tập trung vào SKU
             async function importDataFromExcel() {
                 try {
                     const jsonDataStr = document.getElementById('importModal').dataset.jsonData;
@@ -2511,7 +2769,20 @@
                         loadSKUList()
                     ]);
 
-                    // Thiết lập scanner barcode
+                    // Remove any existing event listener before adding a new one
+                    const searchCompanyBtn = document.getElementById('searchCompany');
+                    if (searchCompanyBtn) {
+                        // Clone and replace the button to remove all existing event listeners
+                        const newSearchBtn = searchCompanyBtn.cloneNode(true);
+                        searchCompanyBtn.parentNode.replaceChild(newSearchBtn, searchCompanyBtn);
+
+                        // Add event listener to the new button
+                        newSearchBtn.addEventListener('click', function () {
+                            showCustomerSearchModal();
+                        });
+                    }
+
+                    // Setup other functionality
                     setupBarcodeScanner();
                     setupBarcodeEvents();
                 } catch (error) {
@@ -2519,6 +2790,139 @@
                     showAlert('error', 'Lỗi kết nối', 'Không thể tải dữ liệu từ AppSheet. Vui lòng thử lại sau.');
                 }
             }
+
+            // Cải thiện trải nghiệm cuộn trang
+            function setupScrollBehavior() {
+                // Đảm bảo sidebar có thể cuộn độc lập với nội dung chính
+                const sidebarContent = document.querySelector('#sidebar .overflow-y-auto');
+                const mainContent = document.querySelector('main');
+
+                // Xử lý cuộn trang trên mobile
+                function adjustMobileLayout() {
+                    const header = document.querySelector('header');
+                    const headerHeight = header.offsetHeight;
+
+                    if (window.innerWidth < 768) {
+                        // Điều chỉnh cho mobile
+                        sidebar.style.top = `${headerHeight}px`;
+                        sidebar.style.height = `calc(100vh - ${headerHeight}px)`;
+                        sidebarContent.style.height = `calc(100vh - ${headerHeight + 60}px)`;
+
+                        // Đảm bảo nội dung chính không bị che khuất bởi header cố định
+                        mainContent.style.paddingTop = `1rem`;
+                    } else {
+                        // Reset cho desktop
+                        sidebar.style.top = '0';
+                        sidebar.style.height = '100vh';
+                        sidebarContent.style.height = 'calc(100vh - 70px)';
+                        mainContent.style.paddingTop = '0';
+                    }
+
+                    // Đảm bảo overlay phủ toàn bộ màn hình khi sidebar hiển thị trên mobile
+                    sidebarOverlay.style.top = `${headerHeight}px`;
+                    sidebarOverlay.style.height = `calc(100vh - ${headerHeight}px)`;
+                }
+
+                // Áp dụng ngay khi trang tải
+                adjustMobileLayout();
+
+                // Áp dụng lại khi thay đổi kích thước màn hình
+                window.addEventListener('resize', adjustMobileLayout);
+
+                // Xử lý sự kiện cuộn màn hình để đảm bảo vị trí các phần tử cố định
+                window.addEventListener('scroll', function () {
+                    if (window.innerWidth < 768) {
+                        const scrollPos = window.scrollY;
+                        const headerHeight = document.querySelector('header').offsetHeight;
+
+                        // Điều chỉnh vị trí sidebar khi cuộn
+                        if (sidebar.classList.contains('md:translate-x-0') ||
+                            !sidebar.classList.contains('-translate-x-full')) {
+                            sidebar.style.top = `${Math.max(0, headerHeight - scrollPos)}px`;
+                        }
+                    }
+                });
+
+                // Ngăn chặn cuộn trang khi tương tác với sidebar trên mobile
+                sidebarContent.addEventListener('touchmove', function (e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Thêm xử lý cho trường hợp mở rộng nội dung quá màn hình
+            function handleOverflowContent() {
+                // Điều chỉnh chiều cao động cho các phần dài
+                const chiTietSection = document.getElementById('chiTietSection');
+                const chiTietTable = document.getElementById('chiTietTable');
+
+                function adjustTableHeight() {
+                    // Giới hạn chiều cao tối đa của bảng chi tiết khi có nhiều dòng
+                    if (orderItems.length > 5) {
+                        const tableContainer = chiTietTable.parentElement;
+                        tableContainer.style.maxHeight = '400px';
+                        tableContainer.style.overflowY = 'auto';
+                    } else {
+                        const tableContainer = chiTietTable.parentElement;
+                        tableContainer.style.maxHeight = 'none';
+                        tableContainer.style.overflowY = 'visible';
+                    }
+                }
+
+                // Áp dụng khi danh sách sản phẩm thay đổi
+                const renderOrderItemsOriginal = renderOrderItems;
+                renderOrderItems = function () {
+                    renderOrderItemsOriginal();
+                    adjustTableHeight();
+                };
+
+                // Đảm bảo scroll tới phần mới thêm khi thêm sản phẩm
+                const addProductToOrderOriginal = addProductToOrder;
+                addProductToOrder = function (product) {
+                    const previousLength = orderItems.length;
+                    addProductToOrderOriginal(product);
+
+                    // Cuộn đến phần chi tiết sản phẩm nếu mới thêm vào
+                    if (previousLength === 0 && orderItems.length > 0) {
+                        chiTietSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+            }
+
+            // Thêm CSS động để cải thiện trải nghiệm cuộn
+            const fixedScrollCSS = `
+        body {
+            scroll-behavior: smooth;
+        }
+        
+        @media (max-width: 767px) {
+            .fixed-header {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+            
+            #sidebar {
+                position: fixed;
+                transition: transform 0.3s ease, top 0.2s ease;
+            }
+            
+            main {
+                padding-bottom: 80px;
+            }
+            
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        .table-container {
+            transition: max-height 0.3s ease;
+        }
+    `;
+
+            const styleElement = document.createElement('style');
+            styleElement.textContent = fixedScrollCSS;
+            document.head.appendChild(styleElement);
 
             // Expose function to global scope for onerror handlers
             window.handleImageError = handleImageError;
@@ -2529,61 +2933,43 @@
 
             // Khởi tạo ứng dụng
             initData();
+            setupScrollBehavior();
+            handleOverflowContent();
         });
 
         const styleElement = document.createElement('style');
         styleElement.textContent = `
-           @media (max-width: 768px) {
-               /* Điều chỉnh vị trí cho sidebar trên mobile */
-               #sidebar {
-                   margin-top: 60px; /* Tạo khoảng cách cho header */
-                   height: calc(100vh - 60px); /* Điều chỉnh chiều cao */
-               }
-               
-               /* Đảm bảo sidebar nằm dưới header */
-               header {
-                   z-index: 45; /* Cao hơn z-index của sidebar (40) */
-               }
-               
-               /* Điều chỉnh phần tìm kiếm trong sidebar */
-               #sidebar .overflow-y-auto {
-                   height: calc(100% - 60px);
-                   padding-top: 10px;
-               }
-               
-               /* Điều chỉnh vị trí của sticky header trong sidebar */
-               #sidebar .sticky.top-0 {
-                   top: 20px; /* Đẩy sticky header xuống dưới main header */
-               }
-               
-               /* Tăng khoảng cách cho nội dung bên trong sidebar */
-               #sidebar .p-4.border-b {
-                   padding-top: 15px;
-                   padding-bottom: 15px;
-               }
-           }
-       `;
+   @media (max-width: 768px) {
+       /* Điều chỉnh vị trí cho sidebar trên mobile */
+       #sidebar {
+           margin-top: 60px; /* Tạo khoảng cách cho header */
+           height: calc(100vh - 60px); /* Điều chỉnh chiều cao */
+       }
+       
+       /* Đảm bảo sidebar nằm dưới header */
+       header {
+           z-index: 45; /* Cao hơn z-index của sidebar (40) */
+       }
+       
+       /* Điều chỉnh phần tìm kiếm trong sidebar */
+       #sidebar .overflow-y-auto {
+           height: calc(100% - 60px);
+           padding-top: 10px;
+       }
+       
+       /* Điều chỉnh vị trí của sticky header trong sidebar */
+       #sidebar .sticky.top-0 {
+           top: 20px; /* Đẩy sticky header xuống dưới main header */
+       }
+       
+       /* Tăng khoảng cách cho nội dung bên trong sidebar */
+       #sidebar .p-4.border-b {
+           padding-top: 15px;
+           padding-bottom: 15px;
+       }
+   }
+`;
         document.head.appendChild(styleElement);
-
-
-      document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
-
-        document.onkeydown = function (e) {
-            if (e.keyCode == 123) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
     </script>
 </body>
 
