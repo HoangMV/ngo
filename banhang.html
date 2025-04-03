@@ -305,16 +305,20 @@
                                     <div class="absolute top-3 left-3 pointer-events-none">
                                         <i class="fas fa-sticky-note text-gray-400"></i>
                                     </div>
-                                    <select id="ghiChu"
-                                        class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="QUA NHÀ LẤY">QUA NHÀ LẤY</option>
-                                        <option value="GỬI HÀNG TK">GỬI HÀNG TK</option>
-                                        <option value="KO THU TIỀN">KO THU TIỀN</option>
-                                        <option value="GIỜ HÀNH CHÍNH">GIỜ HÀNH CHÍNH</option>
-                                        <option value="THIẾU HÀNG">THIẾU HÀNG</option>
-                                    </select>
+                                    <input type="text" id="ghiChu" list="noteOptions"
+                                        class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Chọn hoặc nhập ghi chú">
+                                    <datalist id="noteOptions">
+                                        <option value="QUA NHÀ LẤY">
+                                        <option value="GỬI HÀNG TK">
+                                        <option value="KO THU TIỀN">
+                                        <option value="GIỜ HÀNH CHÍNH">
+                                        <option value="THIẾU HÀNG">
+                                    </datalist>
                                 </div>
                             </div>
+
+
 
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ngày giao hàng dự
@@ -419,6 +423,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Giảm giá theo tiền -->
                                 <div class="form-group">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Giảm giá theo
                                         tiền</label>
@@ -427,9 +432,9 @@
                                             class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                             <i class="fas fa-money-bill-wave text-gray-400"></i>
                                         </div>
-                                        <input type="number" id="giamGiaTheoTien"
-                                            class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            value="0">
+                                        <input type="text" id="giamGiaTheoTien"
+                                            class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 number-format"
+                                            value="0" data-raw-value="0">
                                         <div
                                             class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <span class="text-gray-500 text-sm">VNĐ</span>
@@ -454,6 +459,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Đã thanh toán -->
                                 <div class="form-group">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Đã thanh toán</label>
                                     <div class="relative">
@@ -462,8 +468,8 @@
                                             <i class="fas fa-check-circle text-gray-400"></i>
                                         </div>
                                         <input type="text" id="daThanhToan"
-                                            class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            value="0">
+                                            class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 number-format"
+                                            value="0" data-raw-value="0">
                                         <div
                                             class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <span class="text-gray-500 text-sm">VNĐ</span>
@@ -495,13 +501,18 @@
                                             class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                             <i class="fas fa-credit-card text-gray-400"></i>
                                         </div>
-                                        <select id="phuongThucThanhToan"
-                                            class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="ĐÃ THANH TOÁN">ĐÃ THANH TOÁN</option>
-                                            <option value="CÔNG NỢ">CÔNG NỢ</option>
-                                        </select>
+                                        <input type="text" id="phuongThucThanhToan" list="paymentMethodOptions"
+                                            class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Chọn hoặc nhập phương thức thanh toán">
+                                        <datalist id="paymentMethodOptions">
+                                            <option value="ĐÃ THANH TOÁN">
+                                            <option value="CÔNG NỢ">
+                                            <option value="CHUYỂN KHOẢN">
+                                            <option value="TIỀN MẶT">
+                                        </datalist>
                                     </div>
                                 </div>
+
                             </div>
 
                             <div>
@@ -532,8 +543,8 @@
                                                 <i class="fas fa-truck text-gray-400"></i>
                                             </div>
                                             <input type="text" id="phiShip"
-                                                class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                                                value="0">
+                                                class="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 number-format"
+                                                value="0" data-raw-value="0">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                                 <span class="text-gray-500 text-sm">VNĐ</span>
@@ -742,7 +753,7 @@
 
     <!-- JavaScript -->
     <script>
-        
+
         document.addEventListener('DOMContentLoaded', function () {
             // Cấu hình API AppSheet
             const appSheetConfig = {
@@ -2101,7 +2112,7 @@
                     tableContainer.style.overflowY = 'visible';
                 }
             }
-            
+
             // Cập nhật tổng tiền của một sản phẩm
             function updateItemTotal(item) {
                 item.total = item.quantity * item.price;
@@ -2284,10 +2295,14 @@
                     moneyDiscount.removeAttribute('readonly');
                     percentDiscount.setAttribute('readonly', true);
                     percentDiscount.value = '0';
+                    // Add focus to the money discount field
+                    moneyDiscount.focus();
                 } else if (discountType === 'Giảm giá theo phần trăm') {
                     percentDiscount.removeAttribute('readonly');
                     moneyDiscount.setAttribute('readonly', true);
                     moneyDiscount.value = '0';
+                    // Add focus to the percent discount field
+                    percentDiscount.focus();
                 } else {
                     moneyDiscount.setAttribute('readonly', true);
                     percentDiscount.setAttribute('readonly', true);
@@ -2297,6 +2312,7 @@
 
                 updateTotals();
             });
+
 
             // Input fields for updating totals
             document.getElementById('giamGiaTheoTien').addEventListener('input', updateTotals);
@@ -2919,11 +2935,205 @@
             initData();
             setupScrollBehavior();
             handleOverflowContent();
+
+            // Thiết lập định dạng tiền tệ cho các trường nhập
+            setupCurrencyInputs();
         });
 
-        
-        
-        
+        // Add this to your existing JavaScript
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handle the notes dropdown and text input interaction
+            const ghiChuDropdown = document.getElementById('ghiChuDropdown');
+            const ghiChuText = document.getElementById('ghiChuText');
+
+            // When selecting from dropdown, update the text field
+            ghiChuDropdown.addEventListener('change', function () {
+                if (this.value) {
+                    ghiChuText.value = this.value;
+                }
+            });
+
+            // Update the form submission to use the combined notes
+            const originalHandleSaveAll = handleSaveAll;
+            handleSaveAll = async function () {
+                // Combine notes from dropdown and text input
+                const customNote = document.getElementById('ghiChuText').value;
+                if (customNote) {
+                    document.getElementById('ghiChu').value = customNote;
+                }
+
+                // Call the original function
+                return originalHandleSaveAll.apply(this, arguments);
+            };
+
+            // Add a hidden field to store the combined note value
+            const hiddenGhiChu = document.createElement('input');
+            hiddenGhiChu.type = 'hidden';
+            hiddenGhiChu.id = 'ghiChu';
+            document.getElementById('donHangForm').appendChild(hiddenGhiChu);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Format all number fields on page load
+            document.querySelectorAll('.number-format').forEach(formatNumberField);
+
+            // Add event listeners to all number fields
+            document.querySelectorAll('.number-format').forEach(field => {
+                field.addEventListener('input', handleNumberInput);
+                field.addEventListener('focus', handleNumberFocus);
+                field.addEventListener('blur', handleNumberBlur);
+            });
+
+            // Format a number with thousand separators (Vietnamese format)
+            function formatNumber(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // Parse a formatted number string back to a number
+            function parseFormattedNumber(formattedString) {
+                return parseInt(formattedString.replace(/\./g, '')) || 0;
+            }
+
+            // Format the number field
+            function formatNumberField(field) {
+                const rawValue = field.dataset.rawValue || field.value || '0';
+                const numericValue = parseInt(rawValue) || 0;
+                field.dataset.rawValue = numericValue;
+                field.value = formatNumber(numericValue);
+            }
+
+            // Handle input event
+            function handleNumberInput(e) {
+                const input = e.target;
+                // Remove all non-digit characters
+                const digitsOnly = input.value.replace(/\D/g, '');
+                // Store raw numeric value
+                input.dataset.rawValue = digitsOnly || '0';
+            }
+
+            // Handle focus event - show unformatted value for easier editing
+            function handleNumberFocus(e) {
+                const input = e.target;
+                const rawValue = input.dataset.rawValue || '0';
+                input.value = rawValue;
+                // Select all text when focused
+                setTimeout(() => input.select(), 0);
+            }
+
+            // Handle blur event - format the number when leaving the field
+            function handleNumberBlur(e) {
+                formatNumberField(e.target);
+                // Trigger any calculation updates if needed
+                if (typeof updateTotals === 'function') {
+                    updateTotals();
+                }
+            }
+
+            // Modify the updateTotals function to use raw values
+            if (typeof updateTotals === 'function') {
+                const originalUpdateTotals = updateTotals;
+                updateTotals = function () {
+                    // Get raw values before calculations
+                    const elements = ['tongTienHang', 'phiShip', 'giamGiaTheoTien', 'giamGiaTheoPhanTram', 'daThanhToan'];
+                    elements.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.classList.contains('number-format')) {
+                            // Make sure we're using the raw value for calculations
+                            el.value = el.dataset.rawValue || el.value;
+                        }
+                    });
+
+                    // Call the original function
+                    originalUpdateTotals();
+
+                    // Reformat the fields after calculations
+                    elements.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.classList.contains('number-format')) {
+                            formatNumberField(el);
+                        }
+                    });
+                };
+            }
+
+            // Also update the form submission to use raw values
+            const form = document.getElementById('donHangForm');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    document.querySelectorAll('.number-format').forEach(field => {
+                        field.value = field.dataset.rawValue || '0';
+                    });
+                });
+            }
+        });
+
+
+        function setupCurrencyInputs() {
+            // Danh sách các trường cần định dạng tiền tệ
+            const currencyInputs = ['phiShip', 'daThanhToan', 'giamGiaTheoTien'];
+
+            currencyInputs.forEach(inputId => {
+                const inputElement = document.getElementById(inputId);
+
+                // Chuyển type từ "number" thành "text" cho giamGiaTheoTien
+                if (inputId === 'giamGiaTheoTien') {
+                    inputElement.type = 'text';
+                }
+
+                // Thêm event listener cho sự kiện input để định dạng khi người dùng đang nhập
+                inputElement.addEventListener('input', function () {
+                    // Lấy giá trị hiện tại và loại bỏ tất cả ký tự không phải số
+                    let value = this.value.replace(/\D/g, '');
+
+                    // Chuyển về số và định dạng lại
+                    if (value) {
+                        // Sử dụng hàm formatCurrency có sẵn trong code
+                        this.value = formatCurrency(parseInt(value), false);
+                    } else {
+                        this.value = '0';
+                    }
+
+                    // Cập nhật tổng tiền
+                    updateTotals();
+                });
+
+                // Thêm event listener cho sự kiện blur để đảm bảo định dạng đúng khi rời khỏi trường
+                inputElement.addEventListener('blur', function () {
+                    if (!this.value || isNaN(parseCurrency(this.value))) {
+                        this.value = '0';
+                    } else {
+                        // Định dạng lại khi blur để đảm bảo hiển thị đúng
+                        this.value = formatCurrency(parseCurrency(this.value), false);
+                    }
+                    updateTotals();
+                });
+            });
+
+            // Xử lý riêng cho trường giảm giá theo phần trăm
+            const percentInput = document.getElementById('giamGiaTheoPhanTram');
+            if (percentInput) {
+                percentInput.addEventListener('input', function () {
+                    // Chỉ giữ lại số và dấu thập phân
+                    let value = this.value.replace(/[^\d.]/g, '');
+
+                    // Đảm bảo chỉ có một dấu thập phân
+                    const parts = value.split('.');
+                    if (parts.length > 2) {
+                        value = parts[0] + '.' + parts.slice(1).join('');
+                    }
+
+                    // Giới hạn giá trị tối đa là 100
+                    const numValue = parseFloat(value);
+                    if (numValue > 100) {
+                        value = '100';
+                    }
+
+                    this.value = value;
+                    updateTotals();
+                });
+            }
+        }
+
         const styleElement = document.createElement('style');
         styleElement.textContent = `
    @media (max-width: 768px) {
