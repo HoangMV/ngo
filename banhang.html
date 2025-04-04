@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản lý Đơn hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản lý Đơn hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -103,6 +103,13 @@
         z-index: 9000;
         /* Thấp hơn loading overlay */
     }
+
+    /* Add this media query */
+    @media (max-width: 767px) {
+        #toggleSidebar {
+            display: none !important;
+        }
+    }
 </style>
 
 <body class="bg-gray-50">
@@ -126,7 +133,7 @@
                     <button id="mobileSidebarToggle" class="mr-2 md:hidden text-white">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <h1 class="text-xl font-bold">Hệ Thống Quản Lý Đơn Hàng</h1>
+                    <h1 class="text-xl font-bold">Quản Lý Đơn Hàng</h1>
                 </div>
                 <div class="flex items-center space-x-4">
 
@@ -199,7 +206,7 @@
                                 <i class="fas fa-chevron-down" id="categoryToggleIcon"></i>
                             </button>
                         </div>
-                        <div id="categoryContent" class="mt-2 max-h-24 overflow-y-auto">
+                        <div id="categoryContent" class="max-h-24 overflow-y-auto">
                             <div id="categoryContainer" class="flex flex-wrap gap-2">
                                 <!-- Các nút phân loại sẽ được thêm động bằng JavaScript -->
                                 <button class="px-3 py-1 rounded bg-blue-500 text-white font-medium category-filter"
@@ -416,7 +423,7 @@
                                         </div>
                                         <select id="phanLoaiGiamGia"
                                             class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="Không giảm giá">Không giảm giá</option>
+                                            <option value="">Không giảm giá</option>
                                             <option value="Giảm giá theo tiền">Theo tiền</option>
                                             <option value="Giảm giá theo phần trăm">Theo phần trăm</option>
                                         </select>
@@ -552,10 +559,6 @@
                                                 <option value="25000">
                                                 <option value="30000">
                                                 <option value="35000">
-                                                <option value="40000">
-                                                <option value="45000">
-                                                <option value="50000">
-                                                <option value="55000">
                                             </datalist>
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -962,15 +965,6 @@
                 });
             }
 
-            // Thiết lập các sự kiện cho phần nhập Excel
-            document.getElementById('importBtn').addEventListener('click', openImportModal);
-            document.getElementById('closeImportModal').addEventListener('click', closeImportModal);
-            document.getElementById('cancelImportBtn').addEventListener('click', closeImportModal);
-            document.getElementById('btnChonFile').addEventListener('click', () => document.getElementById('fileInput').click());
-            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-            document.getElementById('btnTaiMauNhap').addEventListener('click', downloadImportTemplate);
-            document.getElementById('btnNhapDuLieu').addEventListener('click', importDataFromExcel);
-
             // Thiết lập quét barcode
             function setupBarcodeScanner() {
                 // Biến lưu trữ kết quả quét
@@ -1191,20 +1185,20 @@
                     // Cập nhật HTML thành dạng có nút tìm kiếm
                     const khachHangContainer = document.querySelector('#khachHang').parentElement.parentElement;
                     khachHangContainer.innerHTML = `
-<div class="relative flex-1">
-    <input type="text" id="companyName" 
-        class="w-full px-3 py-2.5 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Tên khách hàng" readonly>
-    <button id="searchCompany" type="button" class="absolute right-0 top-0 h-full bg-blue-500 text-white px-3 py-2.5 rounded-r-lg">
-        <i class="fas fa-search"></i>
-    </button>
-    <input type="hidden" id="khachHang" name="khachHang" required>
-</div>
-<button type="button" id="btnThemKhachHang"
-    class="px-3 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
-    <i class="fas fa-plus"></i>
-</button>
-`;
+                        <div class="relative flex-1">
+                            <input type="text" id="companyName" 
+                                class="w-full px-3 py-2.5 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Tên khách hàng" readonly>
+                            <button id="searchCompany" type="button" class="absolute right-0 top-0 h-full bg-blue-500 text-white px-3 py-2.5 rounded-r-lg">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <input type="hidden" id="khachHang" name="khachHang" required>
+                        </div>
+                        <button type="button" id="btnThemKhachHang"
+                            class="px-3 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        `;
 
                     // Thêm sự kiện cho nút tìm kiếm sau khi đã tạo trong DOM
                     document.getElementById('searchCompany').addEventListener('click', function () {
@@ -1263,20 +1257,20 @@
             placeholder="Tìm kiếm theo tên, SĐT...">
     </div>
 </div>
-<div class="overflow-y-auto flex-grow">
+<div class="px-4 overflow-y-auto flex-grow">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50 sticky top-0">
             <tr>
-                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tên khách hàng
                 </th>
-                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     SĐT
                 </th>
-                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Địa chỉ
                 </th>
-                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Chọn
                 </th>
             </tr>
@@ -1351,10 +1345,10 @@
                     const customerId = customer['idkh'] || customer.ID;
 
                     row.innerHTML = `
-    <td class="p-1 text-sm text-gray-900">${customer['Họ tên'] || ''}</td>
-    <td class="p-1 text-sm text-gray-500">${customer['SĐT'] || ''}</td>
-    <td class="p-1 text-sm text-gray-500">${customer['Địa chỉ'] || ''}</td>
-    <td class="p-1 text-sm font-medium text-center">
+    <td class="text-sm text-gray-900">${customer['Họ tên'] || ''}</td>
+    <td class="text-sm text-gray-500">${customer['SĐT'] || ''}</td>
+    <td class="text-sm text-gray-500">${customer['Địa chỉ'] || ''}</td>
+    <td class="text-sm font-medium text-center">
         <button class="select-customer-btn text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50" data-id="${customerId}">Chọn</button>
     </td>
 `;
@@ -2206,7 +2200,7 @@
                     // Tạo dữ liệu đơn hàng theo cấu trúc AppSheet
                     const orderData = {
                         'idkh': khachHangId,
-                        'Tổng tiền': tongTienHang,
+                        'Tổng tiền tạm': tongTienHang,
                         'Ghi chú': ghiChu,
                         'Phân loại giảm giá': phanLoaiGiamGia,
                         'Giảm giá theo tiền': parseCurrency(document.getElementById('giamGiaTheoTien').value),
@@ -2332,42 +2326,6 @@
             document.getElementById('giamGiaTheoPhanTram').addEventListener('input', updateTotals);
             document.getElementById('daThanhToan').addEventListener('input', updateTotals);
             document.getElementById('phiShip').addEventListener('change', updateTotals);
-
-            // Setup event listeners for sidebar toggling
-            const sidebar = document.getElementById('sidebar');
-            const sidebarCollapsed = document.getElementById('sidebarCollapsed');
-            const toggleSidebar = document.getElementById('toggleSidebar');
-            const expandSidebar = document.getElementById('expandSidebar');
-            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
-            const closeMobileSidebar = document.getElementById('closeMobileSidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-            toggleSidebar.addEventListener('click', function () {
-                sidebar.classList.add('transform', '-translate-x-full');
-                sidebar.classList.remove('md:translate-x-0');
-                sidebarCollapsed.classList.remove('hidden');
-            });
-
-            expandSidebar.addEventListener('click', function () {
-                sidebar.classList.remove('transform', '-translate-x-full');
-                sidebar.classList.add('md:translate-x-0');
-                sidebarCollapsed.classList.add('hidden');
-            });
-
-            mobileSidebarToggle.addEventListener('click', function () {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            });
-
-            closeMobileSidebar.addEventListener('click', function () {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            });
-
-            sidebarOverlay.addEventListener('click', function () {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            });
 
             // Category toggle
             const categoryHeader = document.getElementById('categoryHeader');
@@ -2798,6 +2756,12 @@
                     // Setup other functionality
                     setupBarcodeScanner();
                     setupBarcodeEvents();
+                    // Khởi tạo sidebar cải tiến
+                    fixSidebar();
+                    addSidebarStyles();
+                    enhanceProductList();
+                    addSidebarScrolling();
+                    addExtraStyles();
                 } catch (error) {
                     console.error('Lỗi khởi tạo dữ liệu:', error);
                     showAlert('error', 'Lỗi kết nối', 'Không thể tải dữ liệu từ AppSheet. Vui lòng thử lại sau.');
@@ -2806,60 +2770,69 @@
 
             // Cải thiện trải nghiệm cuộn trang
             function setupScrollBehavior() {
-                // Đảm bảo sidebar có thể cuộn độc lập với nội dung chính
+                const sidebar = document.getElementById('sidebar');
                 const sidebarContent = document.querySelector('#sidebar .overflow-y-auto');
                 const mainContent = document.querySelector('main');
+                const header = document.querySelector('header');
 
-                // Xử lý cuộn trang trên mobile
                 function adjustMobileLayout() {
-                    const header = document.querySelector('header');
                     const headerHeight = header.offsetHeight;
 
                     if (window.innerWidth < 768) {
-                        // Điều chỉnh cho mobile
+                        // Mobile adjustments
                         sidebar.style.top = `${headerHeight}px`;
                         sidebar.style.height = `calc(100vh - ${headerHeight}px)`;
+                        sidebar.style.zIndex = '100'; // Higher z-index
                         sidebarContent.style.height = `calc(100vh - ${headerHeight + 60}px)`;
 
-                        // Đảm bảo nội dung chính không bị che khuất bởi header cố định
-                        mainContent.style.paddingTop = `1rem`;
+                        // Ensure sidebar is fully hidden when collapsed on mobile
+                        if (sidebar.classList.contains('-translate-x-full')) {
+                            sidebar.style.transform = 'translateX(-100%)';
+                        }
+
+                        // Ensure content doesn't shift when sidebar opens
+                        mainContent.style.paddingLeft = '0';
+
+                        // Fix overlay position
+                        document.getElementById('sidebarOverlay').style.top = `${headerHeight}px`;
+                        document.getElementById('sidebarOverlay').style.zIndex = '90';
                     } else {
-                        // Reset cho desktop
+                        // Desktop reset
                         sidebar.style.top = '0';
                         sidebar.style.height = '100vh';
+                        sidebar.style.zIndex = '30';
                         sidebarContent.style.height = 'calc(100vh - 70px)';
-                        mainContent.style.paddingTop = '0';
+                        mainContent.style.paddingLeft = '';
                     }
-
-                    // Đảm bảo overlay phủ toàn bộ màn hình khi sidebar hiển thị trên mobile
-                    sidebarOverlay.style.top = `${headerHeight}px`;
-                    sidebarOverlay.style.height = `calc(100vh - ${headerHeight}px)`;
                 }
 
-                // Áp dụng ngay khi trang tải
+                // Apply immediately
                 adjustMobileLayout();
 
-                // Áp dụng lại khi thay đổi kích thước màn hình
+                // Re-apply on resize
                 window.addEventListener('resize', adjustMobileLayout);
 
-                // Xử lý sự kiện cuộn màn hình để đảm bảo vị trí các phần tử cố định
-                window.addEventListener('scroll', function () {
-                    if (window.innerWidth < 768) {
-                        const scrollPos = window.scrollY;
-                        const headerHeight = document.querySelector('header').offsetHeight;
+                // Fix mobile sidebar toggle behavior
+                const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+                const closeMobileSidebar = document.getElementById('closeMobileSidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-                        // Điều chỉnh vị trí sidebar khi cuộn
-                        if (sidebar.classList.contains('md:translate-x-0') ||
-                            !sidebar.classList.contains('-translate-x-full')) {
-                            sidebar.style.top = `${Math.max(0, headerHeight - scrollPos)}px`;
-                        }
-                    }
+                mobileSidebarToggle.addEventListener('click', function () {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.style.transform = 'translateX(0)';
+                    sidebarOverlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 });
 
-                // Ngăn chặn cuộn trang khi tương tác với sidebar trên mobile
-                sidebarContent.addEventListener('touchmove', function (e) {
-                    e.stopPropagation();
-                });
+                function closeSidebar() {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebarOverlay.classList.add('hidden');
+                    document.body.style.overflow = ''; // Re-enable scrolling
+                }
+
+                closeMobileSidebar.addEventListener('click', closeSidebar);
+                sidebarOverlay.addEventListener('click', closeSidebar);
             }
 
             // Thêm xử lý cho trường hợp mở rộng nội dung quá màn hình
@@ -2907,26 +2880,68 @@
             scroll-behavior: smooth;
         }
         
-        @media (max-width: 767px) {
-            .fixed-header {
-                position: sticky;
-                top: 0;
-                z-index: 50;
-            }
-            
-            #sidebar {
-                position: fixed;
-                transition: transform 0.3s ease, top 0.2s ease;
-            }
-            
-            main {
-                padding-bottom: 80px;
-            }
-            
-            .overflow-x-auto {
-                -webkit-overflow-scrolling: touch;
-            }
-        }
+        /* Add this CSS to fix the gray space and improve the close button */
+@media (max-width: 767px) {
+/* Hide the toggle sidebar button on mobile devices */
+  #toggleSidebar {
+    display: none !important;
+  }
+    /* Make sidebar match header */
+    #sidebar {
+        height: calc(100vh - 56px) !important;
+        position: fixed !important;
+        width: 100% !important;
+        max-width: 100%;
+        left: 0;
+        z-index: 40;
+    }
+    
+    /* Fix the category section layout */
+    #sidebar .p-4.border-b {
+        position: relative !important; /* Remove sticky positioning */
+        padding: 10px 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    /* Fix the category container to flow naturally */
+    #categoryContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    /* Improve category buttons */
+    .category-filter {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    
+    /* Make sure overlay works correctly */
+    #sidebarOverlay {
+        top: 56px !important;
+        height: calc(100vh - 56px) !important;
+    }
+    
+    /* Close button positioning */
+    #closeMobileSidebar {
+        position: absolute;
+        right: 10px;
+        font-size: 16px;
+        background: rgba(0,0,0,0.05);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Make sidebar title more prominent */
+    #sidebar .p-4.border-b h2 {
+        font-size: 16px;
+        font-weight: 600;
+    }
+}
         
         .table-container {
             transition: max-height 0.3s ease;
@@ -3100,6 +3115,281 @@
         });
 
 
+        // Mobile Optimization
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fix double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = new Date().getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Add mobile optimizations
+            applyMobileOptimizations();
+
+            // Re-apply optimizations when window is resized
+            window.addEventListener('resize', applyMobileOptimizations);
+        });
+
+        function applyMobileOptimizations() {
+            // Add touch-friendly styles
+            const mobileStyles = `
+        * { 
+            touch-action: manipulation;
+        }
+        
+        @media (max-width: 768px) {
+            input, select, button, textarea {
+                font-size: 16px !important; /* Prevent zoom on focus */
+            }
+            
+            /* Make buttons bigger for touch */
+            button, .btn, input[type=button], input[type=submit] {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 8px 12px;
+            }
+            
+            /* Improve table experience */
+            .overflow-x-auto {
+                position: relative;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Fix quantity input */
+            .quantity-decrease, .quantity-increase {
+                min-width: 36px !important;
+                min-height: 36px !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Make sticky headers work better */
+            #chiTietTableHead tr {
+                position: sticky;
+                top: 0;
+                background: white;
+                z-index: 2;
+            }
+            
+            /* Improve bottom spacing */
+            main {
+                padding-bottom: 100px;
+            }
+        }
+    `;
+
+            // Add or update the mobile styles
+            let styleEl = document.getElementById('mobile-optimization-styles');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'mobile-optimization-styles';
+                document.head.appendChild(styleEl);
+            }
+            styleEl.textContent = mobileStyles;
+
+            // Optimize scrolling behavior
+            if (window.innerWidth < 768) {
+                // Apply these only on mobile
+                optimizeTableForMobile();
+                addMobileOptimization();
+                optimizeFormInputs();
+            }
+        }
+
+        // Call these functions from the previous sections
+        function optimizeTableForMobile() {
+            const chiTietTable = document.getElementById('chiTietTable');
+            const tableContainer = chiTietTable.parentElement;
+
+            // Thêm classes và styles cho cuộn ngang mượt mà
+            if (window.innerWidth < 768) {
+                tableContainer.classList.add('swipe-table-container');
+
+                const styleEl = document.createElement('style');
+                styleEl.textContent = `
+            .swipe-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+                position: relative;
+            }
+            
+            .swipe-table-container:after {
+                content: '← Cuộn để xem thêm →';
+                position: absolute;
+                bottom: -20px;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+                opacity: 0.8;
+                padding: 5px 0;
+                /* Tự động ẩn sau 5 giây */
+                animation: fadeOut 5s forwards;
+            }
+            
+            @keyframes fadeOut {
+                0% { opacity: 0.8; }
+                80% { opacity: 0.8; }
+                100% { opacity: 0; }
+            }
+            
+            /* Tối ưu bảng trên điện thoại */
+            @media (max-width: 768px) {
+                #chiTietTable th, #chiTietTable td {
+                    white-space: nowrap;
+                    min-width: 60px;
+                }
+                
+                #chiTietTable th:first-child, 
+                #chiTietTable td:first-child,
+                #chiTietTable th:nth-child(2), 
+                #chiTietTable td:nth-child(2) {
+                    position: sticky;
+                    left: 0;
+                    background: white;
+                    z-index: 1;
+                }
+                
+                #chiTietTable th:nth-child(2), 
+                #chiTietTable td:nth-child(2) {
+                    left: 40px;
+                }
+            }
+        `;
+                document.head.appendChild(styleEl);
+            }
+        }
+
+        function addMobileOptimization() {
+            // Kiểm tra nếu đang xem trên điện thoại
+            if (window.innerWidth < 768) {
+                // Tự động thu gọn sidebar
+                if (document.getElementById('toggleSidebar')) {
+                    document.getElementById('toggleSidebar').click();
+                }
+
+                // Thêm nút scroll-to-top
+                const scrollTopButton = document.createElement('button');
+                scrollTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                scrollTopButton.className = 'scroll-to-top-btn';
+                document.body.appendChild(scrollTopButton);
+
+                // Thêm CSS cho nút scroll to top
+                const styleEl = document.createElement('style');
+                styleEl.textContent = `
+            .scroll-to-top-btn {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: rgba(59, 130, 246, 0.8);
+                color: white;
+                border: none;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                z-index: 100;
+                display: none;
+                justify-content: center;
+                align-items: center;
+                font-size: 20px;
+            }
+        `;
+                document.head.appendChild(styleEl);
+
+                // Show/hide scroll button based on scroll position
+                window.addEventListener('scroll', function () {
+                    if (window.pageYOffset > 300) {
+                        scrollTopButton.style.display = 'flex';
+                    } else {
+                        scrollTopButton.style.display = 'none';
+                    }
+                });
+
+                // Add click event to scroll to top
+                scrollTopButton.addEventListener('click', function () {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        }
+
+        // Thêm vào phần script chính
+        function optimizeFormInputs() {
+            // Tăng kích thước input cho dễ nhấn trên mobile
+            const inputElements = document.querySelectorAll('input, select, button');
+            inputElements.forEach(input => {
+                input.addEventListener('touchstart', function (e) {
+                    // Ngăn bubble event để tránh các hành động không mong muốn
+                    e.stopPropagation();
+                });
+            });
+
+            // Tối ưu nhập số lượng
+            const quantityControls = document.querySelectorAll('.quantity-decrease, .quantity-increase');
+            quantityControls.forEach(btn => {
+                // Tăng diện tích nhấn
+                btn.style.minWidth = '36px';
+                btn.style.minHeight = '36px';
+
+                // Thêm khoảng cách giữa các lần nhấn để tránh double-click
+                let lastClick = 0;
+                btn.addEventListener('touchstart', function (e) {
+                    const now = new Date().getTime();
+                    if (now - lastClick < 500) { // 500ms độ trễ
+                        e.preventDefault();
+                        return;
+                    }
+                    lastClick = now;
+                });
+            });
+        }
+
+        function optimizeButtonsForMobile() {
+            // Thêm CSS để tăng kích thước các button trên mobile
+            const styleEl = document.createElement('style');
+            styleEl.textContent = `
+        @media (max-width: 768px) {
+            button, .btn, 
+            input[type=button], 
+            input[type=submit] {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px;
+            }
+            
+            /* Tăng khoảng cách giữa các nút */
+            .flex.space-x-3 {
+                gap: 12px;
+            }
+            
+            /* Tăng kích thước font chữ */
+            body, input, select, button {
+                font-size: 16px;
+            }
+            
+            /* Tối ưu cho nút delete */
+            .delete-item {
+                padding: 8px;
+                display: inline-block;
+                width: 36px;
+                height: 36px;
+                text-align: center;
+                line-height: 20px;
+            }
+        }
+    `;
+            document.head.appendChild(styleEl);
+        }
+
         function setupCurrencyInputs() {
             // Danh sách các trường cần định dạng tiền tệ
             const currencyInputs = ['phiShip', 'daThanhToan', 'giamGiaTheoTien'];
@@ -3171,7 +3461,6 @@
    @media (max-width: 768px) {
        /* Điều chỉnh vị trí cho sidebar trên mobile */
        #sidebar {
-           margin-top: 60px; /* Tạo khoảng cách cho header */
            height: calc(100vh - 60px); /* Điều chỉnh chiều cao */
        }
        
@@ -3199,6 +3488,365 @@
    }
 `;
         document.head.appendChild(styleElement);
+
+        // Cải thiện chức năng sidebar
+        function fixSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const header = document.querySelector('header');
+            const sidebarContent = document.querySelector('#sidebar .overflow-y-auto');
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            const closeMobileSidebar = document.getElementById('closeMobileSidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const toggleSidebar = document.getElementById('toggleSidebar');
+            const expandSidebar = document.getElementById('expandSidebar');
+            const sidebarCollapsed = document.getElementById('sidebarCollapsed');
+
+            // Điều chỉnh sidebar dựa trên kích thước màn hình
+            function adjustSidebar() {
+                const headerHeight = header.offsetHeight;
+                const isMobile = window.innerWidth < 768;
+
+                if (isMobile) {
+                    // Cấu hình cho thiết bị di động
+                    sidebar.style.top = `${headerHeight}px`;
+                    sidebar.style.height = `calc(100vh - ${headerHeight}px)`;
+                    sidebar.style.zIndex = '40';
+                    sidebar.style.width = '85%';
+                    sidebar.style.maxWidth = '320px';
+
+                    if (sidebarContent) {
+                        sidebarContent.style.height = `calc(100vh - ${headerHeight + 60}px)`;
+                        sidebarContent.style.overflowY = 'auto';
+                        sidebarContent.style.WebkitOverflowScrolling = 'touch';
+                    }
+
+                    // Cấu hình overlay
+                    sidebarOverlay.style.top = `${headerHeight}px`;
+                    sidebarOverlay.style.zIndex = '35';
+                } else {
+                    // Cấu hình cho desktop
+                    sidebar.style.top = '0';
+                    sidebar.style.height = '100vh';
+                    sidebar.style.zIndex = '30';
+                    sidebar.style.width = '20rem';
+                    sidebar.style.maxWidth = '20rem';
+
+                    if (sidebarContent) {
+                        sidebarContent.style.height = 'calc(100vh - 70px)';
+                    }
+                }
+
+                // Hiển thị nút thu gọn/mở rộng sidebar phù hợp
+                if (!isMobile) {
+                    if (sidebar.classList.contains('-translate-x-full')) {
+                        sidebarCollapsed.classList.remove('hidden');
+                    } else {
+                        sidebarCollapsed.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Mở sidebar trên mobile
+            function openMobileSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.style.transform = 'translateX(0)';
+                sidebarOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Ngăn cuộn trang nền
+            }
+
+            // Thu gọn sidebar trên desktop
+            function collapseSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('md:translate-x-0');
+                sidebarCollapsed.classList.remove('hidden');
+            }
+
+            // Mở rộng sidebar trên desktop
+            function expandSidebarDesktop() {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('md:translate-x-0');
+                sidebarCollapsed.classList.add('hidden');
+            }
+
+            // Thiết lập các sự kiện
+            mobileSidebarToggle.addEventListener('click', openMobileSidebar);
+            closeMobileSidebar.addEventListener('click', closeMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            toggleSidebar.addEventListener('click', collapseSidebar);
+            expandSidebar.addEventListener('click', expandSidebarDesktop);
+
+            // Cài đặt ban đầu và khi thay đổi kích thước màn hình
+            adjustSidebar();
+            window.addEventListener('resize', adjustSidebar);
+
+            // Xử lý scroll cho nội dung sidebar
+            if (sidebarContent) {
+                sidebarContent.style.scrollBehavior = 'smooth';
+            }
+
+            // Thêm animation mượt mà
+            sidebar.style.transition = 'transform 0.3s ease, width 0.3s ease';
+        }
+
+        // Thêm CSS để cải thiện giao diện sidebar
+        function addSidebarStyles() {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+        /* Cải thiện giao diện sidebar cho cả desktop và mobile */
+        #sidebar {
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+        
+        /* Cải thiện giao diện nút toggle */
+        #toggleSidebar, #expandSidebar {
+            transition: all 0.2s ease;
+        }
+        
+        #toggleSidebar:hover, #expandSidebar:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Cải thiện hiệu ứng khi hover vào sản phẩm */
+        .product-item {
+            transition: background-color 0.2s ease;
+        }
+        
+        .product-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Thiết lập cho mobile */
+        @media (max-width: 767px) {
+        #toggleSidebar {
+                display: none !important;
+            }
+            #sidebar {
+                width: 85% !important;
+                max-width: 320px !important;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            }
+            
+            #closeMobileSidebar {
+                position: absolute;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                background-color: rgba(0,0,0,0.05);
+                z-index: 2;
+            }
+            
+            #sidebarOverlay {
+                backdrop-filter: blur(2px);
+            }
+            
+            /* Cải thiện hiển thị danh mục sản phẩm */
+            #categoryContainer {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .category-filter {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                font-size: 13px;
+            }
+            
+            /* Cải thiện thanh tìm kiếm */
+            #sidebar .p-4 .relative {
+                margin-bottom: 4px;
+            }
+            
+            /* Thêm hiệu ứng cuộn mượt */
+            #sidebar .overflow-y-auto {
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+            }
+        }
+    `;
+            document.head.appendChild(styleElement);
+        }
+
+        // Cải thiện hiển thị sản phẩm trong sidebar
+        function enhanceProductList() {
+            // Lấy các phần tử cần thiết
+            const productList = document.getElementById('productList');
+            const productSearch = document.getElementById('productSearch');
+
+            if (!productList || !productSearch) return;
+
+            // Thêm placeholder thông minh và focus hiệu ứng
+            productSearch.placeholder = "Tìm tên sản phẩm...";
+            productSearch.addEventListener('focus', function () {
+                this.placeholder = "";
+            });
+            productSearch.addEventListener('blur', function () {
+                this.placeholder = "Tìm tên sản phẩm...";
+            });
+
+            // Thêm xóa từ khóa tìm kiếm
+            const searchContainer = productSearch.parentElement;
+            const clearButton = document.createElement('button');
+            clearButton.className = 'absolute right-3 top-3 text-gray-400 hover:text-gray-600';
+            clearButton.innerHTML = '<i class="fas fa-times-circle"></i>';
+            clearButton.style.display = 'none';
+            searchContainer.appendChild(clearButton);
+
+            // Hiển thị/ẩn nút xóa
+            productSearch.addEventListener('input', function () {
+                clearButton.style.display = this.value ? 'block' : 'none';
+            });
+
+            // Xóa từ khóa tìm kiếm
+            clearButton.addEventListener('click', function () {
+                productSearch.value = '';
+                productSearch.focus();
+                this.style.display = 'none';
+                filterProducts(); // Gọi lại hàm lọc sản phẩm
+            });
+        }
+
+        // Thêm cuộn mượt và scroll-to-top cho sidebar
+        function addSidebarScrolling() {
+            const sidebarContent = document.querySelector('#sidebar .overflow-y-auto');
+
+            if (!sidebarContent) return;
+
+            // Thêm nút cuộn lên đầu danh sách sản phẩm
+            const scrollTopButton = document.createElement('button');
+            scrollTopButton.className = 'fixed bottom-4 left-4 z-50 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg';
+            scrollTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            scrollTopButton.style.display = 'none';
+            scrollTopButton.style.opacity = '0.8';
+
+            // Thêm vào sidebar
+            sidebarContent.appendChild(scrollTopButton);
+
+            // Hiển thị/ẩn nút khi cuộn
+            sidebarContent.addEventListener('scroll', function () {
+                if (this.scrollTop > 300) {
+                    scrollTopButton.style.display = 'flex';
+                } else {
+                    scrollTopButton.style.display = 'none';
+                }
+            });
+
+            // Cuộn lên đầu khi click
+            scrollTopButton.addEventListener('click', function () {
+                sidebarContent.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // Thêm CSS cải thiện sidebar và giao diện sản phẩm
+        function addExtraStyles() {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+        /* Hiệu ứng cho nút toggle sidebar */
+        #toggleSidebar, #expandSidebar {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        #toggleSidebar:hover, #expandSidebar:hover {
+            background-color: #f3f4f6;
+            transform: scale(1.1);
+        }
+        
+        /* Cải thiện hiển thị sản phẩm */
+        .product-item {
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+        
+        .product-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* Hiệu ứng khi sidebar ẩn/hiện */
+        @media (min-width: 768px) {
+            main {
+                transition: padding-left 0.3s ease;
+            }
+            
+            #sidebar.hidden + main {
+                padding-left: 0;
+            }
+        }
+        
+        /* Cải thiện responsive cho điện thoại di động */
+        @media (max-width: 767px) {
+            #mobileSidebarToggle {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Bo tròn góc sidebar khi hiển thị trên mobile */
+            #sidebar {
+                border-top-right-radius: 10px;
+                border-bottom-right-radius: 10px;
+            }
+            
+            /* Hiệu ứng mờ cho overlay */
+            #sidebarOverlay {
+                transition: opacity 0.3s ease;
+                opacity: 0;
+            }
+            
+            #sidebarOverlay:not(.hidden) {
+                opacity: 1;
+            }
+            
+            /* Cải thiện hiển thị danh mục */
+            #categoryContent {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            /* Ẩn "Xem tất cả phân loại" khi không cần thiết */
+            #showAllCategories {
+                display: none;
+            }
+        }
+    `;
+            document.head.appendChild(styleElement);
+        }
+
+        // Đăng ký các chức năng cải tiến sidebar cùng lúc với các sự kiện Excel
+        document.getElementById('importBtn').addEventListener('click', openImportModal);
+        document.getElementById('closeImportModal').addEventListener('click', closeImportModal);
+        document.getElementById('cancelImportBtn').addEventListener('click', closeImportModal);
+        document.getElementById('btnChonFile').addEventListener('click', () => document.getElementById('fileInput').click());
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('btnTaiMauNhap').addEventListener('click', downloadImportTemplate);
+        document.getElementById('btnNhapDuLieu').addEventListener('click', importDataFromExcel);
+
+        // Khởi tạo cải tiến sidebar
+        document.addEventListener('DOMContentLoaded', function () {
+            fixSidebar();
+            addSidebarStyles();
+            enhanceProductList();
+            addSidebarScrolling();
+            addExtraStyles();
+        });
     </script>
 </body>
 
