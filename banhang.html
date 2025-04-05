@@ -161,7 +161,7 @@
             <!-- Sidebar - Fixed position -->
             <div id="sidebar"
                 class="w-80 bg-white border-r border-gray-200 overflow-hidden transition-all duration-300 fixed md:sticky top-0 z-30 h-screen transform -translate-x-full md:translate-x-0">
-                <div class="p-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <div class="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
                     <h2 class="font-semibold text-gray-700">Danh Mục Sản Phẩm</h2>
                     <button id="toggleSidebar" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-chevron-left"></i>
@@ -856,15 +856,11 @@
             // Generate a random order ID
             async function generateOrderId() {
                 try {
-                    console.log('Bắt đầu tạo mã đơn hàng');
-
                     // Lấy tháng hiện tại dưới dạng 2 chữ số (01-12)
                     const today = new Date();
                     const month = (today.getMonth() + 1).toString().padStart(2, '0');
-                    console.log('Tháng hiện tại:', month);
 
                     // Truy vấn API để lấy danh sách đơn hàng trong tháng hiện tại
-                    console.log('Bắt đầu gọi API lấy danh sách đơn hàng');
                     const response = await axios({
                         method: 'POST',
                         url: `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.donHang}/Action`,
@@ -883,7 +879,6 @@
                             }
                         }
                     });
-                    console.log('Kết quả API:', response.data);
 
                     // Kiểm tra nếu không có đơn hàng trong tháng này
                     if (!response.data || response.data.length === 0) {
@@ -895,7 +890,6 @@
                     const ordersInCurrentMonth = response.data.filter(order =>
                         order.idban && order.idban.startsWith(month)
                     );
-                    console.log('Đơn hàng trong tháng hiện tại:', ordersInCurrentMonth);
 
                     if (ordersInCurrentMonth.length === 0) {
                         console.log('Không có đơn hàng tháng này sau khi lọc, trả về mã đầu tiên:', `${month}001`);
@@ -909,7 +903,6 @@
                         const numB = parseInt(b.idban.substring(2), 10);
                         return numB - numA; // Sắp xếp giảm dần
                     });
-                    console.log('Đơn hàng đã sắp xếp:', ordersInCurrentMonth);
 
                     // Lấy mã đơn hàng cuối cùng (lớn nhất)
                     const lastOrder = ordersInCurrentMonth[0];
@@ -918,11 +911,9 @@
 
                     // Trích xuất phần số từ mã
                     const lastNumber = parseInt(lastIdban.substring(2), 10);
-                    console.log('Số cuối cùng:', lastNumber);
 
                     // Tạo số mới tăng lên 1 và đảm bảo luôn có 3 chữ số
                     const newOrderNumber = (lastNumber + 1).toString().padStart(3, '0');
-                    console.log('Số mới:', newOrderNumber);
 
                     // Trả về mã đơn hàng mới
                     const result = `${month}${newOrderNumber}`;
@@ -1102,51 +1093,6 @@
                 }
             }
 
-            // Kiểm tra kết nối API
-            async function testAppSheetConnection() {
-                try {
-                    showLoading('Đang kiểm tra kết nối...');
-
-                    const response = await axios({
-                        method: 'POST',
-                        url: `https://www.appsheet.com/api/v2/apps/${appSheetConfig.appId}/tables/${appSheetConfig.tables.khachHang}/Action`,
-                        headers: {
-                            'ApplicationAccessKey': appSheetConfig.accessKey,
-                            'Content-Type': 'application/json'
-                        },
-                        data: {
-                            "Action": "Find",
-                            "Properties": {
-                                "Locale": "vi-VN",
-                                "Timezone": "Asia/Ho_Chi_Minh",
-                                "Selector": `Select(${appSheetConfig.tables.khachHang})`,
-                                "MaxRecords": 1
-                            }
-                        }
-                    });
-
-                    hideLoading();
-
-                    if (response.status === 200) {
-                        console.log('Kết nối API thành công:', response);
-                        return true;
-                    } else {
-                        throw new Error('Phản hồi không thành công');
-                    }
-                } catch (error) {
-                    hideLoading();
-                    console.error('Lỗi kết nối API:', error);
-
-                    let errorMessage = 'Không thể kết nối đến AppSheet API.';
-                    if (error.response) {
-                        errorMessage += ` Status: ${error.response.status}. ${error.response.data?.error || ''}`;
-                    }
-
-                    showAlert('error', 'Lỗi kết nối!', errorMessage);
-                    return false;
-                }
-            }
-
             // Tải danh sách khách hàng
             async function loadKhachHangList() {
                 try {
@@ -1169,8 +1115,6 @@
                         }
                     });
 
-                    console.log('Phản hồi API khách hàng:', response);
-
                     if (response.data && response.data.Rows) {
                         khachHangList = response.data.Rows;
                     } else if (Array.isArray(response.data)) {
@@ -1179,8 +1123,6 @@
                         console.error('Cấu trúc dữ liệu khách hàng không đúng:', response.data);
                         khachHangList = [];
                     }
-
-                    console.log('Danh sách khách hàng đã tải:', khachHangList);
 
                     // Cập nhật HTML thành dạng có nút tìm kiếm
                     const khachHangContainer = document.querySelector('#khachHang').parentElement.parentElement;
@@ -1452,15 +1394,11 @@
                         }
                     });
 
-                    // Kiểm tra và log cấu trúc dữ liệu thực tế
-                    console.log('API response structure:', response);
-
                     if (response.data && response.data.Rows) {
                         skuList = response.data.Rows;
                         console.log('Loaded SKU list:', skuList);
                     } else if (Array.isArray(response.data)) {
                         skuList = response.data;
-                        console.log('Loaded SKU list as array:', skuList);
                     } else {
                         console.error('Cấu trúc dữ liệu Kho không đúng:', response.data);
                         console.log('Response structure:', response);
@@ -2733,7 +2671,6 @@
             // Initialize data
             async function initData() {
                 try {
-                    await testAppSheetConnection();
                     await Promise.all([
                         loadKhachHangList(),
                         loadNhanVienList(),
@@ -2890,8 +2827,6 @@
     #sidebar {
         height: calc(100vh - 56px) !important;
         position: fixed !important;
-        width: 100% !important;
-        max-width: 100%;
         left: 0;
         z-index: 40;
     }
@@ -3475,11 +3410,6 @@
            padding-top: 10px;
        }
        
-       /* Điều chỉnh vị trí của sticky header trong sidebar */
-       #sidebar .sticky.top-0 {
-           top: 20px; /* Đẩy sticky header xuống dưới main header */
-       }
-       
        /* Tăng khoảng cách cho nội dung bên trong sidebar */
        #sidebar .p-4.border-b {
            padding-top: 15px;
@@ -3622,8 +3552,8 @@
                 display: none !important;
             }
             #sidebar {
-                width: 85% !important;
-                max-width: 320px !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 box-shadow: 5px 0 15px rgba(0,0,0,0.3);
             }
             
@@ -3692,7 +3622,7 @@
             // Thêm xóa từ khóa tìm kiếm
             const searchContainer = productSearch.parentElement;
             const clearButton = document.createElement('button');
-            clearButton.className = 'absolute right-3 top-3 text-gray-400 hover:text-gray-600';
+            clearButton.className = 'absolute right-3 top-0 text-gray-400 hover:text-gray-600';
             clearButton.innerHTML = '<i class="fas fa-times-circle"></i>';
             clearButton.style.display = 'none';
             searchContainer.appendChild(clearButton);
